@@ -16,11 +16,12 @@ import {
 const router = createRouter();
 
 // পাবলিক বা অথেন্টিকেটেড ইউজারের জন্য প্ল্যান দেখার রুট
+router.get("/", listPlans);
 router.get("/plans", listPlans);
 
 // শুধুমাত্র সুপারএডমিনের জন্য প্রোটেক্টেড রুটস
 router.post(
-  "/plans",
+  "/",
   authMiddleware,
   requireRole("superadmin"),
   async (c, next) => {
@@ -33,6 +34,22 @@ router.post(
     return next();
   },
   createPlan
+);
+
+router.patch(
+  "/:id/toggle",
+  authMiddleware,
+  requireRole("superadmin"),
+  async (c, next) => {
+    const params = c.req.param();
+    const parsed = PlanIdParamsSchema.safeParse(params);
+    if (!parsed.success) {
+      return c.json({ message: "Invalid ID parameter" }, 422);
+    }
+    c.req.valid = (type: string) => (type === "param" ? parsed.data : undefined);
+    return next();
+  },
+  togglePlanStatus
 );
 
 router.patch(

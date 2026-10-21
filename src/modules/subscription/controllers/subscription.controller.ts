@@ -14,12 +14,15 @@ export const listPlans: Handler = async (c: any) => {
 // ২. নতুন প্ল্যান তৈরি করা (সুপার এডমিন)
 export const createPlan: Handler = async (c: any) => {
   const body = c.req.valid("json");
+  const maxAccounts = body.maxMfsAccounts ? Number(body.maxMfsAccounts) : null;
+
   const [newPlan] = await db.insert(plans).values({
     name: body.name,
     description: body.description ?? null,
     price: String(body.price),
     durationDays: body.durationDays,
     yearlyDiscount: String(body.yearlyDiscount ?? 0),
+    maxMfsAccounts: maxAccounts,
     isActive: true
   }).returning();
 

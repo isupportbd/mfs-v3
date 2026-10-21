@@ -8,6 +8,7 @@ export const PlanItemSchema = z.object({
   price: z.string(),
   durationDays: z.number(),
   yearlyDiscount: z.string().nullable().optional(),
+  maxMfsAccounts: z.number().nullable().optional(),
   isActive: z.boolean(),
   createdAt: z.string().nullable().optional(),
   updatedAt: z.string().nullable().optional()
@@ -18,7 +19,8 @@ export const CreatePlanSchema = z.object({
   description: z.string().optional(),
   price: z.coerce.number().min(0, "Price must be 0 or more"),
   durationDays: z.coerce.number().int().positive("Duration must be at least 1 day"),
-  yearlyDiscount: z.coerce.number().min(0).max(100).optional().default(0)
+  yearlyDiscount: z.coerce.number().min(0).max(100).optional().default(0),
+  maxMfsAccounts: z.coerce.number().min(0).nullable().optional() // 0 বা null মানে Unlimited
 });
 
 export const UpdatePlanSchema = z.object({

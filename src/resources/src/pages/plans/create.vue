@@ -1,17 +1,11 @@
 <template>
   <Pagebar title="Plans" />
+  <Toast ref="toastRef" />
 
   <div class="plans-management">
     <!-- ১. শীর্ষ ইনলাইন অ্যাড প্ল্যান ফর্ম (স্কেচ অনুযায়ী) -->
     <div class="card border shadow-sm mb-4">
       <div class="card-body py-3">
-        <p v-if="successMsg" class="alert alert-success py-1 small mb-2">
-          <i class="bi bi-check-circle me-1"></i>{{ successMsg }}
-        </p>
-        <p v-if="errorMsg" class="alert alert-danger py-1 small mb-2">
-          <i class="bi bi-exclamation-triangle me-1"></i>{{ errorMsg }}
-        </p>
-
         <form @submit.prevent="submitPlan">
           <div class="row g-2 align-items-end">
             <!-- Plan Name -->
@@ -22,6 +16,7 @@
                 type="text"
                 label="Plan Name"
                 placeholder="e.g. Standard"
+                topclass="mb-0"
                 :err="form.errors.name"
                 focus
                 must />
@@ -33,8 +28,9 @@
                 id="price"
                 v-model="form.data.price"
                 type="number"
-                label="Price"
+                label="Price (৳)"
                 placeholder="e.g. 500"
+                topclass="mb-0"
                 :err="form.errors.price"
                 must />
             </div>
@@ -47,26 +43,41 @@
                 type="number"
                 label="Duration (Days)"
                 placeholder="e.g. 30"
+                topclass="mb-0"
                 :err="form.errors.durationDays"
                 must />
             </div>
 
             <!-- Yearly Discount -->
-            <div class="col-6 col-md-3">
+            <div class="col-6 col-md-2">
               <Input
                 id="yearlyDiscount"
                 v-model="form.data.yearlyDiscount"
                 type="number"
-                label="Yearly Discount (%)"
+                label="Yearly Disc. (%)"
                 placeholder="e.g. 10"
+                topclass="mb-0"
                 :err="form.errors.yearlyDiscount" />
             </div>
 
-            <!-- Add Button -->
+            <!-- MFS Accounts Limit -->
             <div class="col-6 col-md-2">
+              <Input
+                id="maxMfsAccounts"
+                v-model="form.data.maxMfsAccounts"
+                type="number"
+                label="MFS Limit (0=Unlimited)"
+                placeholder="e.g. 2 or 0"
+                topclass="mb-0"
+                :err="form.errors.maxMfsAccounts" />
+            </div>
+
+            <!-- Add Button -->
+            <div class="col-12 col-md-1">
               <Button
                 type="submit"
-                class="btn btn-success w-100 py-2 fw-semibold"
+                class="btn btn-success w-100 fw-semibold"
+                style="height: 37.6px; line-height: 1;"
                 label="Add"
                 icon="bi bi-plus-lg"
                 :disabled="saving" />
@@ -102,6 +113,7 @@
               <tr>
                 <th scope="col" class="ps-3">#</th>
                 <th scope="col">Plan Name</th>
+                <th scope="col">MFS Accounts</th>
                 <th scope="col">Price</th>
                 <th scope="col">Duration</th>
                 <th scope="col">Yearly Discount</th>
@@ -113,6 +125,18 @@
               <tr v-for="(plan, idx) in plansList" :key="plan.id">
                 <td class="ps-3 text-muted small">{{ idx + 1 }}</td>
                 <td class="fw-semibold text-dark">{{ plan.name }}</td>
+                <td>
+                  <span
+                    v-if="!plan.maxMfsAccounts || Number(plan.maxMfsAccounts) === 0"
+                    class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                    <i class="bi bi-infinity me-1"></i>Unlimited
+                  </span>
+                  <span
+                    v-else
+                    class="badge bg-warning-subtle text-dark border border-warning-subtle">
+                    Any {{ plan.maxMfsAccounts }} Accounts
+                  </span>
+                </td>
                 <td class="fw-bold text-success">৳{{ Number(plan.price).toLocaleString() }}</td>
                 <td>
                   <span class="badge bg-light text-dark border">{{ plan.durationDays }} Days</span>
@@ -157,6 +181,7 @@ import { onMounted, ref } from "vue";
 import Button from "@/components/Button.vue";
 import Input from "@/components/Input.vue";
 import Pagebar from "@/components/Pagebar.vue";
+import Toast from "@/components/Toast.vue";
 import { useGumForm } from "@/plugins/gum";
 
 useHead({ title: "Plans Management" });
@@ -167,26 +192,27 @@ interface PlanItem {
   price: string;
   durationDays: number;
   yearlyDiscount: string;
+  maxMfsAccounts: number | null;
   isActive: boolean;
 }
 
+const toastRef = ref<InstanceType<typeof Toast> | null>(null);
 const plansList = ref<PlanItem[]>([]);
 const loading = ref(false);
 const saving = ref(false);
-const errorMsg = ref("");
-const successMsg = ref("");
 
 const form = useGumForm({
   name: "",
   price: 0,
   durationDays: 30,
-  yearlyDiscount: 0
+  yearlyDiscount: 0,
+  maxMfsAccounts: "" as string | number
 });
 
 async function fetchPlans() {
   loading.value = true;
   try {
-    const res = await axios.get("/api/plans");
+    const res = await axios.get("/api/subscription");
     plansList.value = res.data?.data || [];
   } catch (e) {
     console.error("Failed to load plans", e);
@@ -197,22 +223,25 @@ async function fetchPlans() {
 
 async function submitPlan() {
   saving.value = true;
-  errorMsg.value = "";
-  successMsg.value = "";
 
   try {
-    await axios.post("/api/plans", {
+    const numLimit = Number(form.data.maxMfsAccounts);
+    const accountsLimit = !isNaN(numLimit) && numLimit > 0 ? numLimit : null;
+
+    await axios.post("/api/subscription", {
       name: String(form.data.name || "").trim(),
       price: Number(form.data.price),
       durationDays: Number(form.data.durationDays),
-      yearlyDiscount: Number(form.data.yearlyDiscount || 0)
+      yearlyDiscount: Number(form.data.yearlyDiscount || 0),
+      maxMfsAccounts: accountsLimit && accountsLimit > 0 ? accountsLimit : null
     });
 
-    successMsg.value = "Plan added successfully!";
+    toastRef.value?.toastme("Plan added successfully!", "success");
     form.reset();
     await fetchPlans();
   } catch (err: any) {
-    errorMsg.value = err.response?.data?.message || "Failed to create plan. Please verify the input.";
+    const msg = err.response?.data?.message || "Failed to create plan. Please verify the input.";
+    toastRef.value?.toastme(msg, "danger");
   } finally {
     saving.value = false;
   }
@@ -220,10 +249,11 @@ async function submitPlan() {
 
 async function toggleStatus(id: number) {
   try {
-    await axios.patch(`/api/plans/${id}/toggle`);
+    await axios.patch(`/api/subscription/${id}/toggle`);
+    toastRef.value?.toastme("Plan status updated", "info");
     await fetchPlans();
   } catch (e) {
-    console.error("Failed to toggle plan status", e);
+    toastRef.value?.toastme("Failed to update status", "danger");
   }
 }
 

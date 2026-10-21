@@ -10,15 +10,13 @@
         <span class="badge bg-success-subtle text-success small" title="Active Plans">{{ activeCount }} Active</span>
       </div>
       
-      <!-- নতুন ট্যাবে প্ল্যান তৈরি পেজ ওপেন করার বাটন -->
-      <a
+      <!-- মূল পেজে প্ল্যান তৈরি পেজ ওপেন করার বাটন -->
+      <router-link
         v-if="isSuperAdmin"
-        href="/plans/create"
-        target="_blank"
-        rel="noopener noreferrer"
+        to="/plans/create"
         class="btn btn-sm btn-success">
         <i class="bi bi-plus-lg me-1"></i>Add Plan
-      </a>
+      </router-link>
     </div>
 
     <!-- প্ল্যানের তালিকা -->
@@ -37,7 +35,17 @@
         class="list-group-item px-0 d-flex justify-content-between align-items-center">
         <div>
           <span class="fw-semibold text-dark">{{ plan.name }}</span>
-          <span class="badge bg-light text-dark border ms-2">{{ plan.durationDays }} Days</span>
+          <span
+            v-if="!plan.maxMfsAccounts || Number(plan.maxMfsAccounts) === 0"
+            class="badge bg-primary-subtle text-primary border border-primary-subtle ms-2">
+            Unlimited MFS
+          </span>
+          <span
+            v-else
+            class="badge bg-warning-subtle text-dark border border-warning-subtle ms-2">
+            {{ plan.maxMfsAccounts }} MFS
+          </span>
+          <span class="badge bg-light text-dark border ms-1">{{ plan.durationDays }} Days</span>
         </div>
         <div class="d-flex align-items-center">
           <span class="fw-bold me-2">৳{{ Number(plan.price).toLocaleString() }}</span>
@@ -67,6 +75,7 @@ interface PlanItem {
   description?: string;
   price: string;
   durationDays: number;
+  maxMfsAccounts?: number | null;
   isActive: boolean;
 }
 
@@ -81,7 +90,7 @@ const activeCount = computed(() => plansList.value.filter((p) => p.isActive).len
 async function fetchPlans() {
   loading.value = true;
   try {
-    const res = await axios.get("/api/plans");
+    const res = await axios.get("/api/subscription");
     plansList.value = res.data?.data || [];
   } catch (e) {
     console.error("Failed to load plans", e);
@@ -92,7 +101,7 @@ async function fetchPlans() {
 
 async function toggleStatus(id: number) {
   try {
-    await axios.patch(`/api/plans/${id}/toggle`);
+    await axios.patch(`/api/subscription/${id}/toggle`);
     await fetchPlans();
   } catch (e) {
     console.error("Failed to toggle plan status", e);

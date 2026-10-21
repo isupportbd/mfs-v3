@@ -10,6 +10,7 @@ export const plans = pgTable("plans", {
   price: numeric("price", { precision: 12, scale: 2 }).notNull().default("0"),
   durationDays: integer("duration_days").notNull(), // যেমন ৩০ দিন বা ৩৬৫ দিন
   yearlyDiscount: numeric("yearly_discount", { precision: 5, scale: 2 }).default("0"), // বাৎসরিক ছাড়ের শতকরা হার (%)
+  maxMfsAccounts: integer("max_mfs_accounts"), // যেমন 2 টি অথবা null/0 হলে Unlimited
   isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull()

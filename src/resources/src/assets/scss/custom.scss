@@ -41,6 +41,21 @@ body {
   min-height: 100%;
 }
 
+/* Chrome, Safari, Edge, Opera: আপ-ডাউন এরো বাটন বন্ধ */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  margin: 0 !important;
+}
+
+/* Firefox: আপ-ডাউন এরো বাটন বন্ধ */
+input[type="number"] {
+  -webkit-appearance: textfield !important;
+  -moz-appearance: textfield !important;
+  appearance: textfield !important;
+}
+
 $themes: (
   light: (bg: #f5f5f9,
     bg-white: #ffffff,
@@ -181,7 +196,7 @@ $sidebar-width: 16.25rem;
 
   // Outline-dark becomes warning color; datatable pagination follows the same variants
   @each $btn-variant in (primary, secondary, success, danger, warning, info, dark) {
-    $pagination-color: if(sass($btn-variant ==dark): dark-color; else: $btn-variant);
+    $pagination-color: if($btn-variant == dark, dark-color, $btn-variant);
 
     .btn-outline-#{$btn-variant} {
       @if $btn-variant ==dark {
