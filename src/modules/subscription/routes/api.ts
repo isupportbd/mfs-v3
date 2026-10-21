@@ -20,21 +20,18 @@ router.get("/", listPlans);
 router.get("/plans", listPlans);
 
 // শুধুমাত্র সুপারএডমিনের জন্য প্রোটেক্টেড রুটস
-router.post(
-  "/",
-  authMiddleware,
-  requireRole("superadmin"),
-  async (c, next) => {
-    const body = await c.req.json();
-    const parsed = CreatePlanSchema.safeParse(body);
-    if (!parsed.success) {
-      return c.json({ message: "Validation error", errors: parsed.error.issues }, 422);
-    }
-    c.req.valid = (type: string) => (type === "json" ? parsed.data : undefined);
-    return next();
-  },
-  createPlan
-);
+const handleCreatePlan = async (c: any, next: any) => {
+  const body = await c.req.json();
+  const parsed = CreatePlanSchema.safeParse(body);
+  if (!parsed.success) {
+    return c.json({ message: "Validation error", errors: parsed.error.issues }, 422);
+  }
+  c.req.valid = (type: string) => (type === "json" ? parsed.data : undefined);
+  return next();
+};
+
+router.post("/", authMiddleware, requireRole("superadmin"), handleCreatePlan, createPlan);
+router.post("/plans", authMiddleware, requireRole("superadmin"), handleCreatePlan, createPlan);
 
 router.patch(
   "/:id/toggle",
