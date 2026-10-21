@@ -12,12 +12,21 @@ export const listPlans: Handler = async (c: any) => {
 };
 
 // ২. নতুন প্ল্যান তৈরি করা (সুপার এডমিন)
+// একই নামে নতুন প্ল্যান তৈরি হলে আগের প্ল্যানটি স্বয়ংক্রিয়ভাবে ফ্রিজ/ইনঅ্যাক্টিভ (isActive = false) হয়ে যাবে
 export const createPlan: Handler = async (c: any) => {
   const body = c.req.valid("json");
+  const planName = String(body.name || "").trim();
   const maxAccounts = body.maxMfsAccounts ? Number(body.maxMfsAccounts) : null;
 
+  // একই নামের পূর্বের সকল প্ল্যান স্বয়ংক্রিয়ভাবে ফ্রিজ/নিষ্ক্রিয় করা
+  await db
+    .update(plans)
+    .set({ isActive: false, updatedAt: new Date() })
+    .where(eq(plans.name, planName));
+
+  // নতুন রেট/শর্তের প্ল্যানটি সক্রিয় (isActive = true) হিসেবে যুক্ত করা
   const [newPlan] = await db.insert(plans).values({
-    name: body.name,
+    name: planName,
     description: body.description ?? null,
     price: String(body.price),
     durationDays: body.durationDays,
@@ -26,7 +35,7 @@ export const createPlan: Handler = async (c: any) => {
     isActive: true
   }).returning();
 
-  return c.json({ message: "Plan created successfully", data: newPlan }, HttpStatusCodes.CREATED);
+  return c.json({ message: "Plan created successfully. Previous plan with same name has been frozen.", data: newPlan }, HttpStatusCodes.CREATED);
 };
 
 // ৩. প্ল্যান আপডেট বা ডিলিট/ইনঅ্যাক্টিভ করা
