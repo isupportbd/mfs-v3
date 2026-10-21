@@ -25,6 +25,9 @@ export const UserSchema = z.object({
 export const RegisterSchema = z
   .object({
     name: z.string().min(2).max(100),
+    companyName: z.string().min(2, "Company name is required").max(150),
+    mobile: z.string().min(11, "Valid mobile number is required").max(20),
+    address: z.string().min(3, "Address is required").max(500),
     email: z.email(),
     password: z
       .string()

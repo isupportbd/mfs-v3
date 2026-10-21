@@ -1,0 +1,1 @@
+ALTER TABLE "plans" ADD COLUMN "yearly_discount" numeric(5, 2) DEFAULT '0';

@@ -4,6 +4,7 @@ import { authConfig, jwtConfig } from "@/config/index.js";
 import { cookie, db, dispatchEvent, HttpStatusCodes, jwt, password, urls } from "@/framework/facade.js";
 import { roles } from "@/modules/auth/database/models/role.js";
 import { emailVerificationTokens, passwordResetTokens, refreshTokens, users } from "@/modules/auth/database/models/user.js";
+import { subscriptions } from "@/modules/subscription/database/models/subscription.js";
 import {
   hashEmailVerificationToken,
   hashResetToken,
@@ -30,20 +31,41 @@ export const register: Handler = async (c: any) => {
     });
 
     if (existingUser) {
-      return c.json({ message: "Email already exists" }, HttpStatusCodes.UNPROCESSABLE_ENTITY);
+      return c.json({ message: "Email already registered" }, HttpStatusCodes.UNPROCESSABLE_ENTITY);
     }
 
-    const insertResult = await db.insert(users).values({
+    if (body.mobile) {
+      const existingMobile = await db.query.users.findFirst({
+        where: eq(users.mobile, body.mobile)
+      });
+      if (existingMobile) {
+        return c.json({ message: "Mobile number already registered" }, HttpStatusCodes.UNPROCESSABLE_ENTITY);
+      }
+    }
+
+    const [newUser] = await db.insert(users).values({
       name: body.name,
+      companyName: body.companyName,
+      mobile: body.mobile,
+      address: body.address,
       email: body.email,
       password: await password.hashPassword(body.password),
       roleId: defaultRole?.id ?? null
-    });
+    }).returning();
 
-    const insertedId = Number((insertResult as any)[0]?.insertId ?? (insertResult as any).insertId);
+    const insertedId = newUser?.id;
     if (!insertedId) {
       throw new Error("Failed to resolve inserted user id");
     }
+
+    // স্বয়ংক্রিয়ভাবে ৭ দিনের ফ্রি ট্রায়াল সাবস্ক্রিপশন তৈরি করা
+    const trialEndsAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    await db.insert(subscriptions).values({
+      userId: insertedId,
+      status: "trial",
+      activatedAt: new Date(),
+      expiresAt: trialEndsAt
+    });
 
     const user = await db.query.users.findFirst({
       where: eq(users.id, insertedId),

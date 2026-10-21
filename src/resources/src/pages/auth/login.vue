@@ -2,8 +2,9 @@
   <div class="container position-absolute start-50 top-50 translate-middle">
     <div class="auth col-12 col-sm-9 col-md-7 col-lg-5 col-xl-4 mx-auto py-5">
       <div class="card card-body border-0">
-        <div class="d-block mb-2 text-center">
-          <img src="@/assets/images/logo.png" alt="nexgen" style="max-height: 60px;" />
+        <div class="d-flex align-items-center justify-content-center mb-3">
+          <img src="@/assets/images/logo.svg" alt="MFS Ledger Logo" class="me-2" style="width: 32px; height: 42px; object-fit: contain;" />
+          <span class="fs-4 fw-bold" style="color: inherit;">MFS Ledger</span>
         </div>
         <p v-if="errorMessage" class="text-center alert alert-danger text-danger py-1 mt-2">
           {{ errorMessage }}

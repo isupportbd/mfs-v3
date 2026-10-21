@@ -8,6 +8,20 @@
       "when": 1792605449581,
       "tag": "0000_init",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792610920578,
+      "tag": "0001_misty_mystique",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792611862191,
+      "tag": "0002_romantic_iceman",
+      "breakpoints": true
     }
   ]
 }

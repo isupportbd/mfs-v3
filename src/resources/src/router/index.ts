@@ -14,6 +14,12 @@ export const routes = [
         name: "dashboard",
         component: () => import("@/pages/dashboard/index.vue"),
         meta: { requiresAuth: true }
+      },
+      {
+        path: "/plans/create",
+        name: "plans.create",
+        component: () => import("@/pages/plans/create.vue"),
+        meta: { requiresAuth: true }
       }
     ]
   },

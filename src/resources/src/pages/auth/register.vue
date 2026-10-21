@@ -2,8 +2,9 @@
   <div class="container position-absolute start-50 top-50 translate-middle">
     <div class="auth col-12 col-sm-9 col-md-7 col-lg-5 col-xl-4 mx-auto py-5">
       <div class="card card-body border-0">
-        <div class="d-block mb-2 text-center">
-          <img src="@/assets/images/logo.png" alt="nexgen" style="max-height: 60px;" />
+        <div class="d-flex align-items-center justify-content-center mb-3">
+          <img src="@/assets/images/logo.svg" alt="MFS Ledger Logo" class="me-2" style="width: 32px; height: 42px; object-fit: contain;" />
+          <span class="fs-4 fw-bold" style="color: inherit;">MFS Ledger</span>
         </div>
         <h4 class="text-center">Create Account</h4>
         <p
@@ -13,18 +14,48 @@
           {{ message }}
         </p>
         <form @submit.prevent="onSubmit">
-          <div class="mb-4">
+          <div class="mb-3">
             <Input
               id="name"
               v-model="form.data.name"
               type="text"
-              label="name"
-              placeholder="Enter your name..."
+              label="your name"
+              placeholder="Enter your full name..."
               :err="form.errors.name"
               focus
               must />
           </div>
-          <div class="mb-4">
+          <div class="mb-3">
+            <Input
+              id="companyName"
+              v-model="form.data.companyName"
+              type="text"
+              label="company / business name"
+              placeholder="Enter company or shop name..."
+              :err="form.errors.companyName"
+              must />
+          </div>
+          <div class="mb-3">
+            <Input
+              id="mobile"
+              v-model="form.data.mobile"
+              type="text"
+              label="mobile number"
+              placeholder="e.g. 01700000000"
+              :err="form.errors.mobile"
+              must />
+          </div>
+          <div class="mb-3">
+            <Input
+              id="address"
+              v-model="form.data.address"
+              type="text"
+              label="business address"
+              placeholder="Enter address..."
+              :err="form.errors.address"
+              must />
+          </div>
+          <div class="mb-3">
             <Input
               id="email"
               v-model="form.data.email"
@@ -81,6 +112,9 @@ const auth = useAuthStore();
 
 const form = useGumForm({
   name: "",
+  companyName: "",
+  mobile: "",
+  address: "",
   email: "",
   password: "",
   password_confirmation: ""
@@ -104,6 +138,9 @@ const onSubmit = async () => {
     "/api/auth/register",
     {
       name: String(form.data.name || "").trim(),
+      companyName: String(form.data.companyName || "").trim(),
+      mobile: String(form.data.mobile || "").trim(),
+      address: String(form.data.address || "").trim(),
       email: String(form.data.email || "").trim(),
       password: form.data.password,
       password_confirmation: form.data.password_confirmation
