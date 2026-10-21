@@ -117,8 +117,7 @@
                 <th scope="col">Price</th>
                 <th scope="col">Duration</th>
                 <th scope="col">Yearly Discount</th>
-                <th scope="col">Status</th>
-                <th scope="col" class="text-end pe-3">Action</th>
+                <th scope="col" class="text-end pe-3">Status</th>
               </tr>
             </thead>
             <tbody>
@@ -147,23 +146,12 @@
                   </span>
                   <span v-else class="text-muted small">0%</span>
                 </td>
-                <td>
+                <td class="text-end pe-3">
                   <span
                     class="badge"
-                    :class="plan.isActive ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'">
-                    {{ plan.isActive ? 'Active' : 'Inactive' }}
+                    :class="plan.isActive ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-muted'">
+                    {{ plan.isActive ? 'Active' : 'Frozen' }}
                   </span>
-                </td>
-                <td class="text-end pe-3">
-                  <button
-                    type="button"
-                    class="btn btn-sm"
-                    :class="plan.isActive ? 'btn-outline-danger' : 'btn-outline-success'"
-                    :title="plan.isActive ? 'Deactivate' : 'Activate'"
-                    @click="toggleStatus(plan.id)">
-                    <i :class="plan.isActive ? 'bi bi-pause-circle me-1' : 'bi bi-play-circle me-1'"></i>
-                    {{ plan.isActive ? 'Pause' : 'Activate' }}
-                  </button>
                 </td>
               </tr>
             </tbody>
@@ -244,16 +232,6 @@ async function submitPlan() {
     toastRef.value?.toastme(msg, "danger");
   } finally {
     saving.value = false;
-  }
-}
-
-async function toggleStatus(id: number) {
-  try {
-    await axios.patch(`/api/subscription/${id}/toggle`);
-    toastRef.value?.toastme("Plan status updated", "info");
-    await fetchPlans();
-  } catch (e) {
-    toastRef.value?.toastme("Failed to update status", "danger");
   }
 }
 

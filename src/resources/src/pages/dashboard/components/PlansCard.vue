@@ -49,15 +49,11 @@
         </div>
         <div class="d-flex align-items-center">
           <span class="fw-bold me-2">৳{{ Number(plan.price).toLocaleString() }}</span>
-          <button
-            v-if="isSuperAdmin"
-            type="button"
-            class="btn btn-sm btn-link p-0 text-decoration-none"
-            :class="plan.isActive ? 'text-danger' : 'text-success'"
-            :title="plan.isActive ? 'Deactivate' : 'Activate'"
-            @click="toggleStatus(plan.id)">
-            <i :class="plan.isActive ? 'bi bi-pause-circle' : 'bi bi-play-circle'"></i>
-          </button>
+          <span
+            class="badge"
+            :class="plan.isActive ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-muted'">
+            {{ plan.isActive ? 'Active' : 'Frozen' }}
+          </span>
         </div>
       </div>
     </div>
@@ -96,15 +92,6 @@ async function fetchPlans() {
     console.error("Failed to load plans", e);
   } finally {
     loading.value = false;
-  }
-}
-
-async function toggleStatus(id: number) {
-  try {
-    await axios.patch(`/api/subscription/${id}/toggle`);
-    await fetchPlans();
-  } catch (e) {
-    console.error("Failed to toggle plan status", e);
   }
 }
 
