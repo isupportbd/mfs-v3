@@ -1,4 +1,4 @@
-import { createRouter } from "@/framework/facade.js";
+import { createRoute, createRouter, HttpStatusCodes, jsonContent, z } from "@/framework/facade.js";
 import { authMiddleware } from "@/middlewares/auth-middleware.js";
 import { requireRole } from "@/middlewares/role-middleware.js";
 import {
@@ -9,78 +9,144 @@ import {
   togglePlanStatus
 } from "../controllers/subscription.controller.js";
 import {
+  ApproveSubscriptionSchema,
   CreatePlanSchema,
-  PlanIdParamsSchema
+  PlanIdParamsSchema,
+  PlanItemSchema
 } from "../controllers/subscription.schema.js";
 
-const router = createRouter();
-
-// পাবলিক বা অথেন্টিকেটেড ইউজারের জন্য প্ল্যান দেখার রুট
-router.get("/", listPlans);
-router.get("/plans", listPlans);
-
-// শুধুমাত্র সুপারএডমিনের জন্য প্রোটেক্টেড রুটস
-const handleCreatePlan = async (c: any, next: any) => {
-  const body = await c.req.json();
-  const parsed = CreatePlanSchema.safeParse(body);
-  if (!parsed.success) {
-    return c.json({ message: "Validation error", errors: parsed.error.issues }, 422);
+// ১. OpenAPI রুট ডেফিনিশন (Swagger/Scalar Docs-এর জন্য)
+const listPlansRoute = createRoute({
+  path: "/plans",
+  method: "get",
+  tags: ["Subscription"],
+  description: "Get all subscription plans",
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      z.object({ data: z.array(PlanItemSchema) }),
+      "List of plans"
+    )
   }
-  c.req.valid = (type: string) => (type === "json" ? parsed.data : undefined);
-  return next();
-};
+});
 
-router.post("/", authMiddleware, requireRole("superadmin"), handleCreatePlan, createPlan);
-router.post("/plans", authMiddleware, requireRole("superadmin"), handleCreatePlan, createPlan);
+const listPlansRootRoute = createRoute({
+  path: "/",
+  method: "get",
+  tags: ["Subscription"],
+  description: "Get all subscription plans (root alias)",
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      z.object({ data: z.array(PlanItemSchema) }),
+      "List of plans"
+    )
+  }
+});
 
-router.patch(
-  "/:id/toggle",
-  authMiddleware,
-  requireRole("superadmin"),
-  async (c, next) => {
-    const params = c.req.param();
-    const parsed = PlanIdParamsSchema.safeParse(params);
-    if (!parsed.success) {
-      return c.json({ message: "Invalid ID parameter" }, 422);
-    }
-    c.req.valid = (type: string) => (type === "param" ? parsed.data : undefined);
-    return next();
+const createPlanRoute = createRoute({
+  path: "/plans",
+  method: "post",
+  tags: ["Subscription"],
+  description: "Create a new subscription plan (Superadmin only)",
+  request: {
+    body: jsonContent(CreatePlanSchema, "Create Plan Payload")
   },
-  togglePlanStatus
-);
+  responses: {
+    [HttpStatusCodes.CREATED]: jsonContent(
+      z.object({ message: z.string(), data: PlanItemSchema }),
+      "Plan created"
+    )
+  }
+});
 
-router.patch(
-  "/plans/:id/toggle",
-  authMiddleware,
-  requireRole("superadmin"),
-  async (c, next) => {
-    const params = c.req.param();
-    const parsed = PlanIdParamsSchema.safeParse(params);
-    if (!parsed.success) {
-      return c.json({ message: "Invalid ID parameter" }, 422);
-    }
-    c.req.valid = (type: string) => (type === "param" ? parsed.data : undefined);
-    return next();
+const createPlanRootRoute = createRoute({
+  path: "/",
+  method: "post",
+  tags: ["Subscription"],
+  description: "Create a new subscription plan (root alias)",
+  request: {
+    body: jsonContent(CreatePlanSchema, "Create Plan Payload")
   },
-  togglePlanStatus
-);
+  responses: {
+    [HttpStatusCodes.CREATED]: jsonContent(
+      z.object({ message: z.string(), data: PlanItemSchema }),
+      "Plan created"
+    )
+  }
+});
 
-router.get("/subscriptions/pending", authMiddleware, requireRole("superadmin"), listPendingSubscriptions);
-
-router.post(
-  "/subscriptions/:id/approve",
-  authMiddleware,
-  requireRole("superadmin"),
-  async (c, next) => {
-    const params = c.req.param();
-    const parsed = PlanIdParamsSchema.safeParse(params);
-    if (!parsed.success) {
-      return c.json({ message: "Invalid ID parameter" }, 422);
-    }
-    c.req.valid = (type: string) => (type === "param" ? parsed.data : undefined);
-    return next();
+const togglePlanRoute = createRoute({
+  path: "/plans/{id}/toggle",
+  method: "patch",
+  tags: ["Subscription"],
+  description: "Toggle plan active/inactive status",
+  request: {
+    params: PlanIdParamsSchema
   },
-  approveSubscription
-);
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      z.object({ message: z.string(), data: PlanItemSchema }),
+      "Plan status updated"
+    )
+  }
+});
 
-export default router;
+const togglePlanRootRoute = createRoute({
+  path: "/{id}/toggle",
+  method: "patch",
+  tags: ["Subscription"],
+  description: "Toggle plan active/inactive status (root alias)",
+  request: {
+    params: PlanIdParamsSchema
+  },
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      z.object({ message: z.string(), data: PlanItemSchema }),
+      "Plan status updated"
+    )
+  }
+});
+
+const pendingSubscriptionsRoute = createRoute({
+  path: "/subscriptions/pending",
+  method: "get",
+  tags: ["Subscription"],
+  description: "Get all pending user subscriptions for manual approval",
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      z.object({ data: z.array(z.any()) }),
+      "Pending subscriptions"
+    )
+  }
+});
+
+const approveSubscriptionRoute = createRoute({
+  path: "/subscriptions/{id}/approve",
+  method: "post",
+  tags: ["Subscription"],
+  description: "Approve user subscription payment proof",
+  request: {
+    params: PlanIdParamsSchema
+  },
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(
+      z.object({ message: z.string(), data: z.any() }),
+      "Subscription approved"
+    )
+  }
+});
+
+// ২. রাউটার কনফিগারেশন ও রেজিস্ট্রি
+const publicRouter = createRouter()
+  .api(listPlansRoute, listPlans)
+  .api(listPlansRootRoute, listPlans);
+
+const protectedRouter = createRouter()
+  .group(authMiddleware, requireRole("superadmin"))
+  .api(createPlanRoute, createPlan)
+  .api(createPlanRootRoute, createPlan)
+  .api(togglePlanRoute, togglePlanStatus)
+  .api(togglePlanRootRoute, togglePlanStatus)
+  .api(pendingSubscriptionsRoute, listPendingSubscriptions)
+  .api(approveSubscriptionRoute, approveSubscription);
+
+export default createRouter().route("/", publicRouter).route("/", protectedRouter);
