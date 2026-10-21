@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="mfs-grad-1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0d6efd" />
+      <stop offset="100%" stop-color="#00d2ff" />
+    </linearGradient>
+    <linearGradient id="mfs-grad-2" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#198754" />
+      <stop offset="100%" stop-color="#20c997" />
+    </linearGradient>
+  </defs>
+
+  <!-- Left Pillar / MFS node -->
+  <path d="M18 78 V34 L38 56 V78" fill="url(#mfs-grad-1)" />
+  
+  <!-- Right Pillar / Banking node with arrow -->
+  <path d="M82 78 V34 L62 56 V78" fill="url(#mfs-grad-1)" />
+  
+  <!-- Center Dynamic Balance Peak (Double Entry Ledger Bridge) -->
+  <polygon points="50,22 64,38 50,54 36,38" fill="url(#mfs-grad-2)" />
+  
+  <!-- Bottom Connected Settlement Flow Bar -->
+  <rect x="18" y="82" width="64" height="6" rx="3" fill="url(#mfs-grad-1)" />
+</svg>
