@@ -29,9 +29,9 @@ ENV PORT=3000
 # Install runtime dependencies
 RUN apk add --no-cache curl
 
-# Copy package specs and install production-only dependencies
-COPY package*.json ./
-RUN npm install --omit=dev && npm cache clean --force
+# Copy dependencies directly from builder stage
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/node_modules ./node_modules
 
 # Copy built outputs and runtime scripts
 COPY --from=builder /app/dist ./dist
