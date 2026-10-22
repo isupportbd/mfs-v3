@@ -1,28 +1,34 @@
 <template>
   <div class="search-input-wrapper position-relative" :class="props.wrapperClass">
-    <div class="input-group">
-      <span class="input-group-text bg-transparent border-end-0 text-muted">
-        <i v-if="!props.loading" class="bi bi-search"></i>
-        <span v-else class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></span>
-      </span>
-      <input
-        ref="inputRef"
-        v-model="internalValue"
-        type="text"
-        class="form-control border-start-0 border-end-0 ps-0 shadow-none"
-        :placeholder="props.placeholder"
-        :disabled="props.disabled"
-        @keyup.enter="handleEnter" />
-      <span v-if="internalValue" class="input-group-text bg-transparent border-start-0 p-0 pe-2">
-        <button
-          type="button"
-          class="btn btn-sm btn-link text-muted p-0 border-0 text-decoration-none"
-          title="Clear search"
-          @click="clear">
-          <i class="bi bi-x-circle-fill"></i>
-        </button>
-      </span>
-    </div>
+    <i
+      v-if="!props.loading"
+      class="bi bi-search search-icon text-muted"
+      style="pointer-events: none;"></i>
+    <span
+      v-else
+      class="spinner-border spinner-border-sm text-primary search-icon"
+      style="pointer-events: none;"
+      role="status"
+      aria-hidden="true"></span>
+
+    <input
+      ref="inputRef"
+      v-model="internalValue"
+      type="text"
+      class="form-control"
+      :class="{ 'pe-5': internalValue }"
+      :placeholder="props.placeholder"
+      :disabled="props.disabled"
+      @keyup.enter="handleEnter" />
+
+    <button
+      v-if="internalValue"
+      type="button"
+      class="btn btn-sm btn-link text-muted p-0 border-0 text-decoration-none clear-btn"
+      title="Clear search"
+      @click="clear">
+      <i class="bi bi-x-circle-fill"></i>
+    </button>
   </div>
 </template>
 
@@ -93,16 +99,49 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-.search-input-wrapper .form-control:focus {
-  border-color: var(--bs-border-color);
-  box-shadow: none;
+.search-input-wrapper {
+  position: relative;
+  width: 100%;
 }
-.search-input-wrapper .input-group:focus-within {
-  border-radius: 0.375rem;
-  box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.15);
+
+.search-icon {
+  position: absolute;
+  top: 50%;
+  left: 0.85rem;
+  transform: translateY(-50%);
+  z-index: 4;
+  font-size: 0.9rem;
+  background: transparent !important;
+  border: none !important;
+  color: var(--app-placeholder, var(--bs-secondary-color)) !important;
 }
-.search-input-wrapper .input-group:focus-within .input-group-text,
-.search-input-wrapper .input-group:focus-within .form-control {
-  border-color: var(--bs-primary);
+
+.search-input-wrapper .form-control {
+  padding-left: 2.35rem;
+  background-color: var(--bs-body-bg);
+}
+
+.search-input-wrapper .form-control::placeholder {
+  color: var(--app-placeholder, rgba(229, 229, 229, 0.32)) !important;
+  opacity: 1;
+}
+
+.search-input-wrapper .form-control.pe-5 {
+  padding-right: 2.35rem;
+}
+
+.clear-btn {
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  transform: translateY(-50%);
+  z-index: 4;
+  background: transparent;
+  border: none;
+  font-size: 0.95rem;
+}
+
+.clear-btn:hover {
+  color: var(--bs-body-color) !important;
 }
 </style>

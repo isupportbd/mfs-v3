@@ -77,6 +77,7 @@ $themes: (
     skeleton: #efefef,
     skeleton-hi: #f8f8f8,
     border-custom: #cdcdcd,
+    placeholder-color: #8c9199,
     auth-shadow: rgba(34, 48, 62, 0.1),
     sidebar-shadow: rgba(145, 152, 159, 0.12),
     sidebar-link-bg: rgba(59, 142, 237, 0.16),
@@ -109,6 +110,7 @@ $themes: (
     skeleton: #4a4a4a,
     skeleton-hi: #2a2a2a,
     border-custom: #3f3f3f,
+    placeholder-color: rgba(229, 229, 229, 0.32),
     auth-shadow: rgba(0, 0, 0, 0.35),
     sidebar-shadow: rgba(0, 0, 0, 0.35),
     sidebar-link-bg: rgba(59, 142, 237, 0.22),
@@ -134,6 +136,7 @@ $sidebar-width: 16.25rem;
     --app-text: #{map.get($theme, text-color)};
     --app-text-strong: #{map.get($theme, text-color)};
     --app-text-muted: #{map.get($theme, gray-500)};
+    --app-placeholder: #{map.get($theme, placeholder-color)};
     --app-border: #{map.get($theme, border-custom)};
     --app-hover: #{map.get($theme, gray-200)};
     --app-primary: #{map.get($theme, primary)};
@@ -300,6 +303,33 @@ $sidebar-width: 16.25rem;
     --bs-table-active-color: #{map.get($theme, text-color)};
   }
 
+  // Dark mode table headers & badges override
+  @if $theme-name == dark {
+    .table-light,
+    .table .table-light,
+    .table thead,
+    .table thead th,
+    .table thead.table-light th,
+    .table thead.table-light tr {
+      --bs-table-bg: #{map.get($theme, gray-200)} !important;
+      --bs-table-color: #{map.get($theme, text-color)} !important;
+      background-color: #{map.get($theme, gray-200)} !important;
+      color: #{map.get($theme, text-color)} !important;
+      border-color: #{map.get($theme, border-custom)} !important;
+    }
+
+    .table thead.table-light .text-muted,
+    .table thead .text-muted {
+      color: map.get($theme, secondary) !important;
+    }
+
+    .badge.bg-light {
+      background-color: map.get($theme, gray-200) !important;
+      color: map.get($theme, text-color) !important;
+      border-color: map.get($theme, border-custom) !important;
+    }
+  }
+
   .auth {
     background-color: map.get($theme, bg-white);
     box-shadow: 0 0.1875rem 0.5rem 0 map.get($theme, auth-shadow);
@@ -311,7 +341,7 @@ $sidebar-width: 16.25rem;
     border-radius: 0.375rem;
 
     @include media-breakpoint-down(sm) {
-      padding: 3rem 0.5rem;
+      padding: 2rem 1.25rem;
     }
   }
 
@@ -344,7 +374,8 @@ $sidebar-width: 16.25rem;
     }
 
     &::placeholder {
-      color: map.get($theme, gray-500);
+      color: map.get($theme, placeholder-color) !important;
+      opacity: 1;
     }
 
     &[type="checkbox"] {
@@ -1108,10 +1139,27 @@ $sidebar-width: 16.25rem;
 //   width: 1% !important;
 // }
 
+.pagination,
+.datatable-pagination ul.pagination,
+.datatable-general-pagination ul.pagination {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+
+  .page-item {
+    margin: 0;
+
+    .page-link {
+      border-radius: 5px !important;
+      margin: 0 !important;
+    }
+  }
+}
+
 .datatable-pagination .page-item {
   .page-link {
-    border-radius: 5px;
-    margin-left: 0;
+    border-radius: 5px !important;
+    margin: 0 !important;
     border: 1px solid #DFDFDF;
   }
 }
@@ -1129,8 +1177,8 @@ $sidebar-width: 16.25rem;
 
 .datatable-general-pagination .page-item {
   .page-link {
-    border-radius: 5px;
-    margin-left: 0;
+    border-radius: 5px !important;
+    margin: 0 !important;
     border: 1px solid #DFDFDF;
   }
 }

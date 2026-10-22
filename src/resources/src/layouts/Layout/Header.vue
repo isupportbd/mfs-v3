@@ -11,7 +11,7 @@
         </div>
 
         <!-- Header Actions (Buttons) -->
-        <div class="d-flex align-items-center gap-1 flex-shrink-0">
+        <div class="d-flex align-items-center gap-2 flex-shrink-0">
           <template v-for="btn in featureButtons" :key="btn.id">
             <button v-if="!btn.render" type="button" class="nav-btn" :class="btn.class" :title="btn.title || undefined" :aria-label="btn.label || 'button'" v-bind="btn.attrs" @click="btn.onClick">
               <i v-if="btn.icon" :class="btn.icon"></i>
@@ -21,6 +21,11 @@
               <component :is="featureComponent(btn)" />
             </template>
           </template>
+
+          <!-- Theme toggle -->
+          <button id="theme-switch" type="button" title="theme" class="nav-btn" aria-label="button" @click="props.onToggleTheme">
+            <i :class="themeIconClass"></i>
+          </button>
 
           <!-- User dropdown -->
           <div class="btn-group">
@@ -51,11 +56,6 @@
               </li>
             </ul>
           </div>
-
-          <!-- Theme toggle -->
-          <button id="theme-switch" type="button" title="theme" class="nav-btn" aria-label="button" @click="props.onToggleTheme">
-            <i :class="themeIconClass"></i>
-          </button>
         </div>
       </div>
     </nav>

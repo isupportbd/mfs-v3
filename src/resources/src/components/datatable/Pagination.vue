@@ -1,13 +1,13 @@
 <template>
-  <div class="row">
-    <div class="col-12 col-md-6 mb-3 mb-md-0">
-      <div class="py-2 text-black-50 text-center text-md-start">
+  <div class="row align-items-center">
+    <div class="col-12 col-md-6 mb-2 mb-md-0">
+      <div class="py-1 text-muted text-center text-md-start small">
         Showing {{ page.from }} to {{ page.to }} of {{ nFormatter(page.total) }} entries
       </div>
     </div>
     <div class="col-12 col-md-6">
       <nav :class="['datatable-pagination', `pagination-${variant}`]" aria-label="Page navigation">
-        <ul class="pagination justify-content-center justify-content-md-end">
+        <ul class="pagination justify-content-center justify-content-md-end mb-0">
           <!-- First -->
           <li :class="['page-item', { disabled: noPreviousPage }]">
             <button type="button" class="page-link" :aria-disabled="noPreviousPage ? 'true' : 'false'"
@@ -28,7 +28,7 @@
           <li class="page-item">
             <div class="input-group input-group-sm">
               <Input v-model="page.page" type="text" category="number" topclass="m-0" class="text-center"
-                style="width: 100px" @keyup.enter="loadPage(page.page)" />
+                style="width: 55px" @keyup.enter="loadPage(page.page)" />
             </div>
           </li>
 
@@ -127,6 +127,13 @@ watchEffect(() => {
 <style lang="scss" scoped>
 ul.pagination {
   margin: 0;
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+
+  .page-item {
+    margin: 0;
+  }
 
   :deep(.page-item.disabled .page-link),
   :deep(.page-link:disabled),
@@ -138,8 +145,8 @@ ul.pagination {
 
   .page-link {
     border-radius: 5px !important;
-    margin-left: 0;
-    border-color: #cdcdcd !important;
+    margin: 0 !important;
+    border-color: var(--bs-border-color, #cdcdcd) !important;
     color: inherit;
     box-shadow: none;
   }

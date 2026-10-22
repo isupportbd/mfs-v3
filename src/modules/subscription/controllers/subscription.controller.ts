@@ -38,24 +38,7 @@ export const createPlan: Handler = async (c: any) => {
   return c.json({ message: "Plan created successfully. Previous plan with same name has been frozen.", data: newPlan }, HttpStatusCodes.CREATED);
 };
 
-// ৩. প্ল্যান আপডেট বা ডিলিট/ইনঅ্যাক্টিভ করা
-export const togglePlanStatus: Handler = async (c: any) => {
-  const { id } = c.req.valid("param");
-  const plan = await db.query.plans.findFirst({ where: eq(plans.id, id) });
-  if (!plan) {
-    return c.json({ message: "Plan not found" }, HttpStatusCodes.NOT_FOUND);
-  }
-
-  const [updated] = await db
-    .update(plans)
-    .set({ isActive: !plan.isActive, updatedAt: new Date() })
-    .where(eq(plans.id, id))
-    .returning();
-
-  return c.json({ message: "Plan status updated", data: updated });
-};
-
-// ৪. পেন্ডিং সাবস্ক্রিপশন তালিকা (সুপার এডমিনের জন্য)
+// ৩. পেন্ডিং সাবস্ক্রিপশন তালিকা (সুপার এডমিনের জন্য)
 export const listPendingSubscriptions: Handler = async (c: any) => {
   const pending = await db.query.subscriptions.findMany({
     where: eq(subscriptions.status, "pending"),

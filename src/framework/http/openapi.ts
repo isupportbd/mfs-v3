@@ -24,7 +24,10 @@ export function configureOpenApi(app: NexgenRouter) {
     app.get("/favicon.ico", (c) => {
       const faviconPath = path.join(process.cwd(), openApiConfig.scalar.favicon);
       if (!fs.existsSync(faviconPath)) return c.notFound();
-      return c.body(fs.readFileSync(faviconPath), 200, { "content-type": "image/x-icon" });
+      const isSvg = faviconPath.endsWith(".svg");
+      return c.body(fs.readFileSync(faviconPath), 200, {
+        "content-type": isSvg ? "image/svg+xml" : "image/x-icon"
+      });
     });
   }
 

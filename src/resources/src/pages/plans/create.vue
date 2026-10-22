@@ -111,13 +111,13 @@
           <table class="table table-hover align-middle mb-0">
             <thead class="table-light small text-muted">
               <tr>
-                <th scope="col" class="ps-3">#</th>
-                <th scope="col">Plan Name</th>
-                <th scope="col">MFS Accounts</th>
-                <th scope="col">Price</th>
-                <th scope="col">Duration</th>
-                <th scope="col">Yearly Discount</th>
-                <th scope="col" class="text-end pe-3">Status</th>
+                <th scope="col" class="ps-3" style="width: 50px;">#</th>
+                <th scope="col" style="width: 25%;">Plan Name</th>
+                <th scope="col" style="width: 20%;">MFS Accounts</th>
+                <th scope="col" style="width: 15%;">Price</th>
+                <th scope="col" style="width: 15%;">Duration</th>
+                <th scope="col" style="width: 15%;">Yearly Discount</th>
+                <th scope="col" class="text-end pe-3" style="width: 10%;">Status</th>
               </tr>
             </thead>
             <tbody>

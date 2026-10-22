@@ -5,8 +5,7 @@ import {
   approveSubscription,
   createPlan,
   listPendingSubscriptions,
-  listPlans,
-  togglePlanStatus
+  listPlans
 } from "../controllers/subscription.controller.js";
 import {
   ApproveSubscriptionSchema,
@@ -74,38 +73,6 @@ const createPlanRootRoute = createRoute({
   }
 });
 
-const togglePlanRoute = createRoute({
-  path: "/plans/{id}/toggle",
-  method: "patch",
-  tags: ["Subscription"],
-  description: "Toggle plan active/inactive status",
-  request: {
-    params: PlanIdParamsSchema
-  },
-  responses: {
-    [HttpStatusCodes.OK]: jsonContent(
-      z.object({ message: z.string(), data: PlanItemSchema }),
-      "Plan status updated"
-    )
-  }
-});
-
-const togglePlanRootRoute = createRoute({
-  path: "/{id}/toggle",
-  method: "patch",
-  tags: ["Subscription"],
-  description: "Toggle plan active/inactive status (root alias)",
-  request: {
-    params: PlanIdParamsSchema
-  },
-  responses: {
-    [HttpStatusCodes.OK]: jsonContent(
-      z.object({ message: z.string(), data: PlanItemSchema }),
-      "Plan status updated"
-    )
-  }
-});
-
 const pendingSubscriptionsRoute = createRoute({
   path: "/subscriptions/pending",
   method: "get",
@@ -144,8 +111,6 @@ const protectedRouter = createRouter()
   .group(authMiddleware, requireRole("superadmin"))
   .api(createPlanRoute, createPlan)
   .api(createPlanRootRoute, createPlan)
-  .api(togglePlanRoute, togglePlanStatus)
-  .api(togglePlanRootRoute, togglePlanStatus)
   .api(pendingSubscriptionsRoute, listPendingSubscriptions)
   .api(approveSubscriptionRoute, approveSubscription);
 

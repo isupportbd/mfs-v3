@@ -1,60 +1,29 @@
 <template>
-  <div>
-    <!-- কার্ডের একদম শীর্ষ হেডার: বামে টাইটেল ও কাউন্ট, ডানে নতুন ট্যাবে অ্যাড বাটন -->
-    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+  <div class="d-flex flex-column justify-content-between h-100">
+    <div class="d-flex justify-content-between align-items-center mb-3">
       <div class="d-flex align-items-center">
         <div class="me-2 text-success fs-5">
           <i class="bi bi-card-checklist"></i>
         </div>
-        <h5 class="card-title mb-0 fs-6 fw-semibold me-2">Plans</h5>
-        <span class="badge bg-success-subtle text-success small" title="Active Plans">{{ activeCount }} Active</span>
+        <h5 class="card-title mb-0 fs-6 fw-semibold">Plans</h5>
       </div>
-      
-      <!-- মূল পেজে প্ল্যান তৈরি পেজ ওপেন করার বাটন -->
+
       <router-link
         v-if="isSuperAdmin"
         to="/plans/create"
-        class="btn btn-sm btn-success">
-        <i class="bi bi-plus-lg me-1"></i>Add Plan
+        class="btn btn-sm btn-outline-success">
+        <i class="bi bi-sliders me-1"></i>Manage
       </router-link>
     </div>
 
-    <!-- প্ল্যানের তালিকা -->
-    <div v-if="loading" class="text-center py-3">
-      <span class="spinner-border spinner-border-sm text-success" role="status"></span>
-    </div>
-
-    <div v-else-if="plansList.length === 0" class="text-center py-2 text-muted small">
-      No plans created yet.
-    </div>
-
-    <div v-else class="list-group list-group-flush small">
-      <div
-        v-for="plan in plansList"
-        :key="plan.id"
-        class="list-group-item px-0 d-flex justify-content-between align-items-center">
-        <div>
-          <span class="fw-semibold text-dark">{{ plan.name }}</span>
-          <span
-            v-if="!plan.maxMfsAccounts || Number(plan.maxMfsAccounts) === 0"
-            class="badge bg-primary-subtle text-primary border border-primary-subtle ms-2">
-            Unlimited MFS
-          </span>
-          <span
-            v-else
-            class="badge bg-warning-subtle text-dark border border-warning-subtle ms-2">
-            {{ plan.maxMfsAccounts }} MFS
-          </span>
-          <span class="badge bg-light text-dark border ms-1">{{ plan.durationDays }} Days</span>
-        </div>
-        <div class="d-flex align-items-center">
-          <span class="fw-bold me-2">৳{{ Number(plan.price).toLocaleString() }}</span>
-          <span
-            class="badge"
-            :class="plan.isActive ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-muted'">
-            {{ plan.isActive ? 'Active' : 'Frozen' }}
-          </span>
-        </div>
+    <div class="py-2">
+      <div v-if="loading" class="text-muted small">
+        <span class="spinner-border spinner-border-sm text-success me-1" role="status"></span>
+        Loading...
+      </div>
+      <div v-else class="d-flex align-items-baseline">
+        <span class="display-6 fw-bold me-2">{{ activeCount }}</span>
+        <span class="text-muted small">Total Active Plans</span>
       </div>
     </div>
   </div>
