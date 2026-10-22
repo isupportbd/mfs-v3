@@ -83,6 +83,17 @@ export async function initDatabase() {
 
   pool = postgres(databaseConfig.url);
   databaseInstance = drizzlePg(pool, { schema });
+
+  // Auto-run migrations in production or if tables are not yet created
+  try {
+    const { migrate } = await optionalImport("drizzle-orm/postgres-js/migrator");
+    const migrationsFolder = path.resolve(process.cwd(), "src/database/migrations/postgresql");
+    await migrate(databaseInstance, { migrationsFolder });
+  } catch (err: any) {
+    // If migration already ran or folder not found, log warning and continue
+    console.warn("Auto-migration notice:", err?.message || err);
+  }
+
   return databaseInstance;
 }
 

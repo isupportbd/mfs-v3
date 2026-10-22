@@ -73,3 +73,21 @@ export function formatDate(value: string | null): string {
   const date = DateTime.fromISO(value);
   return date.isValid ? date.toFormat("dd MMM yyyy") : value;
 }
+
+export function toBengaliNumber(val: any): string {
+  if (val === undefined || val === null || val === "") return "০";
+  const str = String(val);
+  const banglaDigits: Record<string, string> = {
+    "0": "০",
+    "1": "১",
+    "2": "২",
+    "3": "৩",
+    "4": "৪",
+    "5": "৫",
+    "6": "৬",
+    "7": "৭",
+    "8": "৮",
+    "9": "৯"
+  };
+  return str.replace(/[0-9]/g, match => banglaDigits[match] || match);
+}

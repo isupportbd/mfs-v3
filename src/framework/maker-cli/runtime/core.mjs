@@ -74,7 +74,14 @@ async function waitForHealth(url, maxRetries = 240, intervalMs = 500) {
     try {
       const res = await fetch(url);
       if (res.ok) return;
-    } catch {}
+    } catch {
+      if (url.includes("localhost")) {
+        try {
+          const res = await fetch(url.replace("localhost", "127.0.0.1"));
+          if (res.ok) return;
+        } catch {}
+      }
+    }
     if (!warned) {
       warned = true;
       console.log(`Waiting for API health (${url})...`);
@@ -91,7 +98,8 @@ async function waitForHealth(url, maxRetries = 240, intervalMs = 500) {
  *  health before spawning the UI). Set SKIP_BACKEND_WAIT=1 to disable. */
 export async function waitForBackendIfNeeded() {
   if (process.env.SKIP_BACKEND_WAIT === "1") return;
-  const healthUrl = `${process.env.APP_URL || "http://localhost:3000"}/health`;
+  const port = process.env.APP_PORT || 3000;
+  const healthUrl = process.env.APP_HEALTH_URL || `http://127.0.0.1:${port}/health`;
   await waitForHealth(healthUrl);
 }
 
@@ -225,7 +233,8 @@ async function runDevStack(flags = []) {
       });
 
       try {
-        await waitForHealth("http://localhost:3000/health");
+        const hPort = process.env.APP_PORT || 3000;
+        await waitForHealth(`http://127.0.0.1:${hPort}/health`);
       } catch (err) {
         settled = true;
         shutdown();

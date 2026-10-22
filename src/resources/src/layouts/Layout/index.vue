@@ -6,7 +6,6 @@
         :is-scrolled="headerScrolled"
         :theme-mode="themeMode"
         :on-logout="logout"
-        :on-toggle-sidebar="ui.toggleSidebar"
         :on-toggle-theme="ui.cycleTheme" />
       <!-- content start -->
       <div class="content">
@@ -61,8 +60,6 @@ function onScroll() {
 }
 
 onMounted(() => {
-  ui.initTheme();
-
   window.addEventListener("scroll", onScroll, { passive: true });
   onScroll();
 
@@ -77,19 +74,44 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   window.removeEventListener("scroll", onScroll);
-  ui.cleanupTheme();
 });
 </script>
 
 <style scoped>
 .main.full-width {
   padding-left: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: hidden;
+}
+
+.content-wrapper {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  padding-left: 0.75rem !important;
+  padding-right: 0.75rem !important;
+}
+
+.content {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 @media (max-width: 576px) {
   .main.full-width {
-    margin-left: 0.35rem !important;
-    margin-right: 0.35rem !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .content-wrapper {
+    padding-left: 0.35rem !important;
+    padding-right: 0.35rem !important;
   }
 }
 </style>

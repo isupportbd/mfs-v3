@@ -8,12 +8,13 @@ import { env } from "@/env.js";
  *      literals. Username/password are credentials and stay in .env.
  */
 export const mailConfig = {
-  host: "127.0.0.1",
-  port: 1089,
-  encryption: "none",
+  host: env.MAIL_HOST || "127.0.0.1",
+  port: Number(env.MAIL_PORT) || 1089,
+  encryption: env.MAIL_ENCRYPTION || (Number(env.MAIL_PORT) === 465 ? "ssl" : "none"),
   username: env.MAIL_USERNAME,
   password: env.MAIL_PASSWORD,
-  fromAddress: "no-reply@example.com",
+  fromAddress: env.MAIL_FROM_ADDRESS || env.MAIL_USERNAME || "no-reply@example.com",
+  fromName: env.MAIL_FROM_NAME || "MFS Ledger",
   failSilent: true,
   maildev: {
     smtpPort: 1089,

@@ -9,7 +9,7 @@
         <form @submit.prevent="submitPlan">
           <div class="row g-2 align-items-end">
             <!-- Plan Name -->
-            <div class="col-12 col-md-3">
+            <div class="col-12 col-md-3 col-xl-2">
               <Input
                 id="name"
                 v-model="form.data.name"
@@ -23,7 +23,7 @@
             </div>
 
             <!-- Price -->
-            <div class="col-6 col-md-2">
+            <div class="col-6 col-md-2 col-xl-2">
               <Input
                 id="price"
                 v-model="form.data.price"
@@ -36,49 +36,61 @@
             </div>
 
             <!-- Duration -->
-            <div class="col-6 col-md-2">
+            <div class="col-6 col-md-2 col-xl-1">
               <Input
                 id="durationDays"
                 v-model="form.data.durationDays"
                 type="number"
-                label="Duration (Days)"
-                placeholder="e.g. 30"
+                label="Duration"
+                placeholder="30"
                 topclass="mb-0"
                 :err="form.errors.durationDays"
                 must />
             </div>
 
             <!-- Yearly Discount -->
-            <div class="col-6 col-md-2">
+            <div class="col-6 col-md-2 col-xl-1">
               <Input
                 id="yearlyDiscount"
                 v-model="form.data.yearlyDiscount"
                 type="number"
-                label="Yearly Disc. (%)"
-                placeholder="e.g. 10"
+                label="Disc. (%)"
+                placeholder="10"
                 topclass="mb-0"
                 :err="form.errors.yearlyDiscount" />
             </div>
 
             <!-- MFS Accounts Limit -->
-            <div class="col-6 col-md-2">
+            <div class="col-6 col-md-3 col-xl-2">
               <Input
                 id="maxMfsAccounts"
                 v-model="form.data.maxMfsAccounts"
                 type="number"
-                label="MFS Limit (0=Unlimited)"
-                placeholder="e.g. 2 or 0"
+                label="MFS Limit (0=Unltd)"
+                placeholder="0"
                 topclass="mb-0"
                 :err="form.errors.maxMfsAccounts" />
             </div>
 
+            <!-- Max Transactions Limit -->
+            <div class="col-6 col-md-3 col-xl-2">
+              <Input
+                id="maxTransactions"
+                v-model="form.data.maxTransactions"
+                type="number"
+                label="Max Trx (0=Unltd)"
+                placeholder="0"
+                topclass="mb-0"
+                :err="form.errors.maxTransactions" />
+            </div>
+
             <!-- Add Button -->
-            <div class="col-12 col-md-1">
+            <div class="col-12 col-md-2 col-xl-2">
               <Button
                 type="submit"
                 class="btn btn-success w-100 fw-semibold"
                 style="height: 37.6px; line-height: 1;"
-                label="Add"
+                label="Add Plan"
                 icon="bi bi-plus-lg"
                 :disabled="saving" />
             </div>
@@ -111,12 +123,13 @@
           <table class="table table-hover align-middle mb-0">
             <thead class="table-light small text-muted">
               <tr>
-                <th scope="col" class="ps-3" style="width: 50px;">#</th>
-                <th scope="col" style="width: 25%;">Plan Name</th>
-                <th scope="col" style="width: 20%;">MFS Accounts</th>
+                <th scope="col" class="ps-3" style="width: 40px;">#</th>
+                <th scope="col" style="width: 20%;">Plan Name</th>
+                <th scope="col" style="width: 15%;">MFS Accounts</th>
+                <th scope="col" style="width: 15%;">Max Transactions</th>
                 <th scope="col" style="width: 15%;">Price</th>
-                <th scope="col" style="width: 15%;">Duration</th>
-                <th scope="col" style="width: 15%;">Yearly Discount</th>
+                <th scope="col" style="width: 12%;">Duration</th>
+                <th scope="col" style="width: 13%;">Yearly Discount</th>
                 <th scope="col" class="text-end pe-3" style="width: 10%;">Status</th>
               </tr>
             </thead>
@@ -134,6 +147,18 @@
                     v-else
                     class="badge bg-warning-subtle text-dark border border-warning-subtle">
                     Any {{ plan.maxMfsAccounts }} Accounts
+                  </span>
+                </td>
+                <td>
+                  <span
+                    v-if="!plan.maxTransactions || Number(plan.maxTransactions) === 0"
+                    class="badge bg-success-subtle text-success border border-success-subtle">
+                    <i class="bi bi-infinity me-1"></i>Unlimited
+                  </span>
+                  <span
+                    v-else
+                    class="badge bg-info-subtle text-info border border-info-subtle">
+                    {{ Number(plan.maxTransactions).toLocaleString() }} Trx
                   </span>
                 </td>
                 <td class="fw-bold text-success">৳{{ Number(plan.price).toLocaleString() }}</td>
@@ -181,6 +206,7 @@ interface PlanItem {
   durationDays: number;
   yearlyDiscount: string;
   maxMfsAccounts: number | null;
+  maxTransactions: number | null;
   isActive: boolean;
 }
 
@@ -194,7 +220,8 @@ const form = useGumForm({
   price: 0,
   durationDays: 30,
   yearlyDiscount: 0,
-  maxMfsAccounts: "" as string | number
+  maxMfsAccounts: "" as string | number,
+  maxTransactions: "" as string | number
 });
 
 async function fetchPlans() {
@@ -213,15 +240,19 @@ async function submitPlan() {
   saving.value = true;
 
   try {
-    const numLimit = Number(form.data.maxMfsAccounts);
-    const accountsLimit = !isNaN(numLimit) && numLimit > 0 ? numLimit : null;
+    const numAccounts = Number(form.data.maxMfsAccounts);
+    const accountsLimit = !isNaN(numAccounts) && numAccounts > 0 ? numAccounts : null;
+
+    const numTrx = Number(form.data.maxTransactions);
+    const trxLimit = !isNaN(numTrx) && numTrx > 0 ? numTrx : null;
 
     await axios.post("/api/subscription", {
       name: String(form.data.name || "").trim(),
       price: Number(form.data.price),
       durationDays: Number(form.data.durationDays),
       yearlyDiscount: Number(form.data.yearlyDiscount || 0),
-      maxMfsAccounts: accountsLimit && accountsLimit > 0 ? accountsLimit : null
+      maxMfsAccounts: accountsLimit,
+      maxTransactions: trxLimit
     });
 
     toastRef.value?.toastme("Plan added successfully!", "success");

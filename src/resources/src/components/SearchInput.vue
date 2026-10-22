@@ -118,12 +118,11 @@ onBeforeUnmount(() => {
 
 .search-input-wrapper .form-control {
   padding-left: 2.35rem;
-  background-color: var(--bs-body-bg);
 }
 
 .search-input-wrapper .form-control::placeholder {
-  color: var(--app-placeholder, rgba(229, 229, 229, 0.32)) !important;
-  opacity: 1;
+  color: var(--app-placeholder, #94a3b8) !important;
+  opacity: 0.85;
 }
 
 .search-input-wrapper .form-control.pe-5 {

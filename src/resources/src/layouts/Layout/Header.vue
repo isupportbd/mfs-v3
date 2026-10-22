@@ -90,7 +90,6 @@ interface HeaderProps {
   isScrolled: boolean;
   themeMode: "light" | "dark" | "auto";
   onLogout: () => void | Promise<void>;
-  onToggleSidebar: () => void;
   onToggleTheme: () => void;
 }
 

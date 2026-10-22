@@ -1,6 +1,6 @@
 <template>
   <div class="min-vh-100 d-flex align-items-center justify-content-center py-4 px-3">
-    <div class="auth w-100">
+    <div class="auth auth-wide w-100">
       <div class="card card-body border-0 p-0 bg-transparent">
         <div class="d-flex align-items-center justify-content-center mb-3">
           <img src="@/assets/images/logo.svg" alt="MFS Ledger Logo" class="me-2" style="width: 32px; height: 42px; object-fit: contain;" />
@@ -13,6 +13,13 @@
           :class="isError ? 'alert-danger text-danger' : 'alert-success text-success'">
           {{ message }}
         </p>
+        <div v-if="selectedPlanId" class="alert alert-info py-2 px-3 mb-3 d-flex align-items-center justify-content-between small">
+          <div>
+            <i class="bi bi-patch-check-fill text-info me-1"></i>
+            <span>Selected Plan: <strong>{{ selectedPlanName }}</strong> (7 Days Free Trial)</span>
+          </div>
+          <router-link to="/pricing" class="small text-decoration-none fw-semibold">Change</router-link>
+        </div>
         <form @submit.prevent="onSubmit">
           <div class="mb-3">
             <Input
@@ -97,8 +104,8 @@
 
 <script setup lang="ts">
 import { useHead } from "@vueuse/head";
-import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { computed, onMounted, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import Input from "@/components/Input.vue";
 import InputPasswordToggle from "@/components/InputPasswordToggle.vue";
 import Button from "@/components/Button.vue";
@@ -107,8 +114,13 @@ import { useAuthStore } from "@/stores/auth";
 
 useHead({ title: "Register" });
 
+const route = useRoute();
 const router = useRouter();
 const auth = useAuthStore();
+
+const selectedPlanId = computed(() => (route.query.plan ? Number(route.query.plan) : null));
+const planNames: Record<number, string> = { 1: "Basic", 2: "Business", 3: "Enterprise" };
+const selectedPlanName = computed(() => (selectedPlanId.value ? planNames[selectedPlanId.value] || "Standard Plan" : ""));
 
 const form = useGumForm({
   name: "",
@@ -123,6 +135,12 @@ const form = useGumForm({
 const processing = form.processing;
 const message = ref("");
 const isError = ref(false);
+
+onMounted(() => {
+  if (!route.query.plan) {
+    router.replace("/pricing#plans");
+  }
+});
 
 const onSubmit = async () => {
   message.value = "";
@@ -143,7 +161,8 @@ const onSubmit = async () => {
       address: String(form.data.address || "").trim(),
       email: String(form.data.email || "").trim(),
       password: form.data.password,
-      password_confirmation: form.data.password_confirmation
+      password_confirmation: form.data.password_confirmation,
+      planId: selectedPlanId.value || undefined
     },
     {
       onSuccess: async () => {

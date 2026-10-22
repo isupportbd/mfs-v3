@@ -16,9 +16,51 @@ export const routes = [
         meta: { requiresAuth: true }
       },
       {
+        path: "/customers",
+        name: "customers",
+        component: () => import("@/pages/customers/index.vue"),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: "/providers",
+        name: "providers",
+        component: () => import("@/pages/providers/index.vue"),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: "/capital",
+        name: "capital",
+        component: () => import("@/pages/capital/index.vue"),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: "/transactions",
+        name: "transactions",
+        component: () => import("@/pages/transactions/index.vue"),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: "/loans",
+        name: "loans",
+        component: () => import("@/pages/loans/index.vue"),
+        meta: { requiresAuth: true }
+      },
+      {
         path: "/plans/create",
         name: "plans.create",
         component: () => import("@/pages/plans/create.vue"),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: "/subscription",
+        name: "subscription",
+        component: () => import("@/pages/subscription/index.vue"),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: "/settings",
+        name: "settings",
+        component: () => import("@/pages/settings/index.vue"),
         meta: { requiresAuth: true }
       },
       {
@@ -65,14 +107,27 @@ export const routes = [
         meta: { guestOnly: true }
       }
     ]
+  },
+  {
+    path: "/pricing",
+    name: "pricing",
+    component: () => import("@/pages/pricing/index.vue"),
+    meta: { requiresAuth: false }
+  },
+  {
+    path: "/home",
+    redirect: "/pricing"
   }
 ];
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
-  scrollBehavior: (_to, _from, savedPosition) => {
+  scrollBehavior: (to, _from, savedPosition) => {
     if (savedPosition) return savedPosition;
+    if (to.hash) {
+      return { el: to.hash, behavior: "smooth" };
+    }
     return { top: 0 };
   }
 });

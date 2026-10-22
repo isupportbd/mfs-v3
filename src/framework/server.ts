@@ -1,9 +1,9 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import chalk from "chalk";
-import { appConfig, mailConfig, realtimeConfig, redisConfig } from "@/config/index.js";
+import { appConfig, mailConfig, queueConfig, realtimeConfig, redisConfig } from "@/config/index.js";
 import { createKernel } from "@/framework/kernel.js";
-import { stopQueueRuntime } from "@/framework/queue/queue.js";
+import { startQueueWorker, stopQueueRuntime } from "@/framework/queue/queue.js";
 import { stopQueueDashboard } from "@/framework/queue/ui.js";
 import { broadcast, closeRealtime, initRealtime, WS_PATH } from "@/framework/realtime/index.js";
 import { setupSocketAdminUI } from "@/framework/realtime/ui.js";
@@ -115,6 +115,15 @@ export async function startServer(): Promise<ServerHandle> {
           logger.error("Broadcast relay error", { error });
         }
       });
+    }
+  }
+
+  if (redisConfig.enabled && redisReady()) {
+    try {
+      await startQueueWorker(queueConfig.queues);
+      console.log(`Queue workers started: ${queueConfig.queues.join(", ")}`);
+    } catch (err: any) {
+      logger.warn("Could not start inline queue workers", { error: err?.message || err });
     }
   }
 

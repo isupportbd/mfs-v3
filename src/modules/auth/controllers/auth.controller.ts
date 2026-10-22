@@ -62,6 +62,7 @@ export const register: Handler = async (c: any) => {
     const trialEndsAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     await db.insert(subscriptions).values({
       userId: insertedId,
+      planId: body.planId ? Number(body.planId) : null,
       status: "trial",
       activatedAt: new Date(),
       expiresAt: trialEndsAt

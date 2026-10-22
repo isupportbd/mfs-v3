@@ -1,13 +1,17 @@
 <template>
-  <div class="pagebar-container pt-1 pb-1 mb-2">
+  <div class="pagebar-container mb-2" style="padding-top: 5px; padding-bottom: 5px;">
     <nav aria-label="breadcrumb">
-      <ol class="breadcrumb m-0 small fst-italic align-items-center" style="font-size: 0.825rem;">
+      <ol class="breadcrumb m-0 small fst-italic align-items-center" style="font-size: 0.85rem;">
         <li class="breadcrumb-item">
           <router-link to="/" class="text-decoration-none text-muted">
-            <i class="bi bi-house-door me-1"></i>Dashboard
+            <i class="bi bi-house-door me-1"></i>হোম
           </router-link>
         </li>
-        <li v-if="props.title && props.title.toLowerCase() !== 'dashboard'" class="breadcrumb-item active fw-medium text-dark" aria-current="page">
+        <li
+          v-if="props.title && props.title.toLowerCase() !== 'dashboard' && props.title !== 'হোম'"
+          class="breadcrumb-item active fw-medium"
+          style="color: var(--bs-body-color) !important;"
+          aria-current="page">
           {{ props.title }}
         </li>
       </ol>
@@ -34,4 +38,20 @@ onMounted(() => {
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.breadcrumb {
+  --bs-breadcrumb-item-padding-x: 0.25rem;
+}
+.breadcrumb-item + .breadcrumb-item {
+  padding-left: 0.25rem !important;
+  &::before {
+    padding-right: 0.25rem !important;
+  }
+}
+:global(html.theme-dark .breadcrumb-item.active) {
+  color: #f8fafc !important;
+}
+:global(html.theme-light .breadcrumb-item.active) {
+  color: #1e293b !important;
+}
+</style>

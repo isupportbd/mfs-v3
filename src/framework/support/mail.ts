@@ -13,7 +13,7 @@ type MailPayload = {
 const transport = nodemailer.createTransport({
   host: mailConfig.host,
   port: mailConfig.port,
-  secure: mailConfig.encryption === "ssl",
+  secure: mailConfig.encryption === "ssl" || mailConfig.port === 465,
   auth: mailConfig.username ? { user: mailConfig.username, pass: mailConfig.password } : undefined
 });
 
@@ -28,9 +28,13 @@ export const mail = {
    */
   async sendMail(payload: MailPayload) {
     try {
+      const from = (mailConfig as any).fromName
+        ? `"${(mailConfig as any).fromName}" <${mailConfig.fromAddress}>`
+        : mailConfig.fromAddress;
+
       return await mailBreaker.exec(() =>
         transport.sendMail({
-          from: mailConfig.fromAddress,
+          from,
           ...payload
         })
       );

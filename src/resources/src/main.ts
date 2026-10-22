@@ -7,6 +7,7 @@ import { GumPlugin } from "@/plugins/gum";
 import { PulsePlugin } from "@/plugins/pulse";
 import App from "./App.vue";
 import router from "./router";
+import { useAdminUiStore } from "@/stores/admin-ui";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
@@ -23,4 +24,9 @@ app.use(head);
 app.use(DialogPlugin);
 app.use(GumPlugin);
 app.use(PulsePlugin);
+
+// Single source of truth for the theme: index.html already applied the class
+// before the first paint, here we only sync the store state.
+useAdminUiStore(pinia).initTheme();
+
 app.mount("#app");

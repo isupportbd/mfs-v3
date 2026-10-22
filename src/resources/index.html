@@ -6,6 +6,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MFS Ledger</title>
     <link rel="icon" type="image/svg+xml" href="./src/assets/images/logo.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <script>
+      // Apply the persisted theme before the first paint so the app never flashes
+      // the wrong background. Kept in sync with stores/admin-ui.ts.
+      (function () {
+        var root = document.documentElement;
+        var mode = "auto";
+        try {
+          var stored = localStorage.getItem("app-theme");
+          if (stored === "light" || stored === "dark" || stored === "auto") mode = stored;
+        } catch (e) {
+          /* storage unavailable - fall back to "auto" */
+        }
+        var effective = mode;
+        if (mode === "auto") {
+          effective =
+            window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        }
+        root.classList.add("theme-" + mode);
+        root.setAttribute("data-bs-theme", effective);
+      })();
+    </script>
   </head>
 
   <body>

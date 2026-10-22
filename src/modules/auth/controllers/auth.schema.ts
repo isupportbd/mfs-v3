@@ -36,7 +36,8 @@ export const RegisterSchema = z
       .regex(/[a-z]/, "Password must contain lowercase letter")
       .regex(/[A-Z]/, "Password must contain uppercase letter")
       .regex(/[^A-Za-z0-9]/, "Password must contain special character"),
-    password_confirmation: z.string()
+    password_confirmation: z.string(),
+    planId: z.coerce.number().optional().nullable()
   })
   .superRefine((data, ctx) => {
     if (data.password !== data.password_confirmation) {

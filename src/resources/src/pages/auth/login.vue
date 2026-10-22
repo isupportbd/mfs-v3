@@ -1,6 +1,6 @@
 <template>
   <div class="min-vh-100 d-flex align-items-center justify-content-center py-4 px-3">
-    <div class="auth w-100">
+    <div class="auth auth-login w-100">
       <div class="card card-body border-0 p-0 bg-transparent">
         <div class="d-flex align-items-center justify-content-center mb-3">
           <img src="@/assets/images/logo.svg" alt="MFS Ledger Logo" class="me-2" style="width: 32px; height: 42px; object-fit: contain;" />
@@ -39,7 +39,7 @@
             icon="bi bi-box-arrow-in-right" :disabled="processing" />
           <div class="text-center mt-3">
             <span class="text-muted">Don't have an account?</span>
-            <router-link to="/register" class="ms-1 text-decoration-none">Register</router-link>
+            <router-link to="/pricing#plans" class="ms-1 text-decoration-none">Register</router-link>
           </div>
         </form>
       </div>
@@ -86,6 +86,7 @@ const onSubmit = async () => {
         auth.initialized = false;
         await auth.bootstrap();
         form.reset("password");
+        console.clear();
         await router.push("/");
       },
       onError: (_errors, error) => {

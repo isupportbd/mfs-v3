@@ -3,18 +3,6 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted } from "vue";
-import { useAdminUiStore } from "@/stores/admin-ui";
-
-const ui = useAdminUiStore();
-
-onMounted(() => {
-  ui.initTheme();
-});
-
-onBeforeUnmount(() => {
-  ui.cleanupTheme();
-});
+// The theme is initialised once in main.ts, so this layout only renders the
+// active page.
 </script>
-
-<style scoped></style>

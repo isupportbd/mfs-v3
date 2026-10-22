@@ -40,7 +40,7 @@ const notify = ref<HTMLElement | null>(null);
 const message = ref("");
 const bgcolor = ref("primary");
 
-const toastme = (msg: string, bg: string) => {
+const toastme = (msg: string, bg: string = "primary") => {
   message.value = msg;
   bgcolor.value = bg;
   if (!notify.value) {
@@ -50,7 +50,12 @@ const toastme = (msg: string, bg: string) => {
   toast.show();
 };
 
-defineExpose({ toastme });
+const success = (msg: string) => toastme(msg, "success");
+const error = (msg: string) => toastme(msg, "danger");
+const info = (msg: string) => toastme(msg, "info");
+const warning = (msg: string) => toastme(msg, "warning");
+
+defineExpose({ toastme, success, error, info, warning });
 </script>
 
 <style lang="scss" scoped></style>

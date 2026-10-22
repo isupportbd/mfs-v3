@@ -17,6 +17,7 @@ export const createPlan: Handler = async (c: any) => {
   const body = c.req.valid("json");
   const planName = String(body.name || "").trim();
   const maxAccounts = body.maxMfsAccounts ? Number(body.maxMfsAccounts) : null;
+  const maxTrx = body.maxTransactions ? Number(body.maxTransactions) : null;
 
   // একই নামের পূর্বের সকল প্ল্যান স্বয়ংক্রিয়ভাবে ফ্রিজ/নিষ্ক্রিয় করা
   await db
@@ -31,7 +32,8 @@ export const createPlan: Handler = async (c: any) => {
     price: String(body.price),
     durationDays: body.durationDays,
     yearlyDiscount: String(body.yearlyDiscount ?? 0),
-    maxMfsAccounts: maxAccounts,
+    maxMfsAccounts: maxAccounts && maxAccounts > 0 ? maxAccounts : null,
+    maxTransactions: maxTrx && maxTrx > 0 ? maxTrx : null,
     isActive: true
   }).returning();
 
@@ -83,4 +85,61 @@ export const approveSubscription: Handler = async (c: any) => {
     message: `Subscription approved successfully. Valid for ${durationDays} days.`,
     data: approved
   });
+};
+
+// ৬. বর্তমান ইউজারের সক্রিয় সাবস্ক্রিপশন ও সকল পূর্ববর্তী হিস্ট্রি
+export const getMySubscription: Handler = async (c: any) => {
+  const auth = c.get("auth");
+
+  const history = await db.query.subscriptions.findMany({
+    where: eq(subscriptions.userId, auth.id),
+    with: { plan: true },
+    orderBy: [desc(subscriptions.id)]
+  });
+
+  // বর্তমান সক্রিয় বা ট্রায়াল সাবস্ক্রিপশন (যদি থাকে)
+  const current = history.find(s => s.status === "active" || s.status === "trial") || history[0] || null;
+
+  return c.json({
+    data: {
+      current,
+      history
+    }
+  });
+};
+
+// ৭. ইউজার নতুন প্লানের জন্য পেমেন্ট রিকোয়েস্ট সাবমিট করা (আপগ্রেড / পরিবর্তন)
+export const requestSubscription: Handler = async (c: any) => {
+  const auth = c.get("auth");
+  const body = c.req.valid("json");
+
+  const plan = await db.query.plans.findFirst({
+    where: eq(plans.id, body.planId)
+  });
+
+  if (!plan) {
+    return c.json({ message: "প্লানটি পাওয়া যায়নি" }, HttpStatusCodes.NOT_FOUND);
+  }
+
+  const [created] = await db
+    .insert(subscriptions)
+    .values({
+      userId: auth.id,
+      planId: plan.id,
+      status: "pending",
+      paymentMethod: body.paymentMethod,
+      trxId: body.trxId,
+      paymentNote: body.paymentNote || null,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    })
+    .returning();
+
+  return c.json(
+    {
+      message: "সাবস্ক্রিপশন রিকোয়েস্ট জমা হয়েছে। সুপারএডমিন ভেরিফাই করে সক্রিয় করবেন।",
+      data: created
+    },
+    HttpStatusCodes.CREATED
+  );
 };

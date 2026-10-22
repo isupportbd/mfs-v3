@@ -5,6 +5,9 @@ const THEME_KEY = "app-theme";
 const SIDEBAR_COLLAPSE_KEY = "sidebar-open-collapses";
 const SIDEBAR_SCROLL_KEY = "sidebar-scroll-top";
 type ThemeMode = "light" | "dark" | "auto";
+type EffectiveTheme = "light" | "dark";
+const THEME_MODES: ThemeMode[] = ["light", "dark", "auto"];
+const THEME_CLASSES = ["theme-light", "theme-dark", "theme-auto"];
 
 export const useAdminUiStore = defineStore("admin-ui", () => {
   const sidebarOpen = ref(false);
@@ -13,10 +16,19 @@ export const useAdminUiStore = defineStore("admin-ui", () => {
   const sidebarScrollTop = ref(0);
   let sidebarAccordionEl: HTMLElement | null = null;
   let sidebarScrollListener: (() => void) | null = null;
+  let colorSchemeQuery: MediaQueryList | null = null;
+  let colorSchemeListener: ((event: MediaQueryListEvent) => void) | null = null;
 
   const themeIcon = computed(() => {
     if (themeMode.value === "light") return "bi-brightness-high-fill";
-    return "bi-moon-stars";
+    if (themeMode.value === "dark") return "bi-moon-stars";
+    return "bi-circle-half";
+  });
+
+  const isDark = computed(() => {
+    if (themeMode.value === "dark") return true;
+    if (themeMode.value === "light") return false;
+    return systemPrefersDark();
   });
 
   const toggleSidebar = () => {
@@ -27,30 +39,74 @@ export const useAdminUiStore = defineStore("admin-ui", () => {
     sidebarOpen.value = false;
   };
 
+  const systemPrefersDark = () => window.matchMedia?.("(prefers-color-scheme: dark)")?.matches ?? false;
+
+  const resolveEffectiveTheme = (mode: ThemeMode): EffectiveTheme => (mode === "auto" ? (systemPrefersDark() ? "dark" : "light") : mode);
+
   const applyTheme = (mode: ThemeMode) => {
     themeMode.value = mode;
-    document.body.classList.remove("theme-light", "theme-dark", "theme-auto");
-    document.body.classList.add(`theme-${mode}`);
-    localStorage.setItem(THEME_KEY, mode);
+
+    // Apply to both documentElement and body so all CSS selectors work consistently
+    const effective = resolveEffectiveTheme(mode);
+    const root = document.documentElement;
+    root.classList.remove(...THEME_CLASSES);
+    root.classList.add(`theme-${mode}`);
+    root.setAttribute("data-bs-theme", effective);
+
+    if (typeof document !== "undefined" && document.body) {
+      document.body.classList.remove(...THEME_CLASSES);
+      document.body.classList.add(`theme-${mode}`);
+    }
+
+    try {
+      localStorage.setItem(THEME_KEY, mode);
+    } catch {
+      /* storage unavailable - theme stays for this session only */
+    }
+  };
+
+  const toggleTheme = () => {
+    applyTheme(isDark.value ? "light" : "dark");
   };
 
   const cycleTheme = () => {
-    const order: ThemeMode[] = ["light", "dark"];
-    const index = order.indexOf(themeMode.value);
-    applyTheme(order[(index + 1) % order.length]);
+    const index = THEME_MODES.indexOf(themeMode.value);
+    applyTheme(THEME_MODES[(index + 1) % THEME_MODES.length]);
   };
 
   const initTheme = () => {
-    const saved = localStorage.getItem(THEME_KEY);
-    if (saved === "light" || saved === "dark") {
-      applyTheme(saved);
-      return;
+    let saved: string | null = null;
+    try {
+      saved = localStorage.getItem(THEME_KEY);
+    } catch {
+      saved = null;
     }
 
-    applyTheme("light");
+    const mode = THEME_MODES.includes(saved as ThemeMode) ? (saved as ThemeMode) : "auto";
+    applyTheme(mode);
+    watchSystemColorScheme();
   };
 
-  const cleanupTheme = () => {};
+  // While the theme is "auto", follow the operating system preference.
+  const watchSystemColorScheme = () => {
+    cleanupTheme();
+    if (!window.matchMedia) return;
+
+    colorSchemeQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    colorSchemeListener = (event: MediaQueryListEvent) => {
+      if (themeMode.value !== "auto") return;
+      document.documentElement.setAttribute("data-bs-theme", event.matches ? "dark" : "light");
+    };
+    colorSchemeQuery.addEventListener("change", colorSchemeListener);
+  };
+
+  const cleanupTheme = () => {
+    if (colorSchemeQuery && colorSchemeListener) {
+      colorSchemeQuery.removeEventListener("change", colorSchemeListener);
+    }
+    colorSchemeQuery = null;
+    colorSchemeListener = null;
+  };
 
   const loadSidebarCollapseIds = () => {
     try {
@@ -135,9 +191,11 @@ export const useAdminUiStore = defineStore("admin-ui", () => {
     sidebarOpen,
     themeMode,
     themeIcon,
+    isDark,
     toggleSidebar,
     closeSidebar,
     applyTheme,
+    toggleTheme,
     cycleTheme,
     initTheme,
     cleanupTheme,

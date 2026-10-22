@@ -3,6 +3,8 @@ import type { Handler } from "hono";
 import { db, HttpStatusCodes } from "@/framework/facade.js";
 import { financialProviders } from "../database/models/providers.js";
 import { settings } from "../database/models/settings.js";
+import { companyOfferRules } from "../database/models/company-offers.js";
+import { customerFeeRules } from "../database/models/customer-fees.js";
 
 let tablesEnsured = false;
 async function ensureTables() {
@@ -197,5 +199,214 @@ export const blockDeleteProvider: Handler = async (c: any) => {
     },
     HttpStatusCodes.FORBIDDEN
   );
+};
+
+// ==========================================
+// ৯. কোম্পানি অফার রুলস (Company Offer Rules)
+// ==========================================
+
+export const listCompanyOffers: Handler = async (c: any) => {
+  const auth = c.get("auth");
+  const offers = await db.query.companyOfferRules.findMany({
+    where: eq(companyOfferRules.userId, auth.id),
+    orderBy: [desc(companyOfferRules.id)],
+    with: { provider: true }
+  });
+  return c.json({ data: offers });
+};
+
+export const createCompanyOffer: Handler = async (c: any) => {
+  const auth = c.get("auth");
+  const body = c.req.valid("json");
+
+  const [created] = await db
+    .insert(companyOfferRules)
+    .values({
+      userId: auth.id,
+      providerId: body.providerId || null,
+      title: body.title,
+      transactionType: body.transactionType,
+      triggerType: body.triggerType,
+      targetThreshold: String(body.targetThreshold || 0),
+      rewardType: body.rewardType,
+      rewardValue: String(body.rewardValue || 0),
+      settlementType: body.settlementType,
+      startDate: body.startDate || null,
+      endDate: body.endDate || null,
+      isActive: body.isActive !== undefined ? body.isActive : true
+    })
+    .returning();
+
+  return c.json({ message: "অফার সফলভাবে সংরক্ষিত হয়েছে", data: created }, HttpStatusCodes.CREATED);
+};
+
+export const updateCompanyOffer: Handler = async (c: any) => {
+  const auth = c.get("auth");
+  const { id } = c.req.valid("param");
+  const body = c.req.valid("json");
+
+  const existing = await db.query.companyOfferRules.findFirst({
+    where: and(eq(companyOfferRules.id, id), eq(companyOfferRules.userId, auth.id))
+  });
+
+  if (!existing) {
+    return c.json({ message: "অফার পাওয়া যায়নি" }, HttpStatusCodes.NOT_FOUND);
+  }
+
+  const [updated] = await db
+    .update(companyOfferRules)
+    .set({
+      providerId: body.providerId !== undefined ? body.providerId : existing.providerId,
+      title: body.title !== undefined ? body.title : existing.title,
+      transactionType: body.transactionType !== undefined ? body.transactionType : existing.transactionType,
+      triggerType: body.triggerType !== undefined ? body.triggerType : existing.triggerType,
+      targetThreshold: body.targetThreshold !== undefined ? String(body.targetThreshold) : existing.targetThreshold,
+      rewardType: body.rewardType !== undefined ? body.rewardType : existing.rewardType,
+      rewardValue: body.rewardValue !== undefined ? String(body.rewardValue) : existing.rewardValue,
+      settlementType: body.settlementType !== undefined ? body.settlementType : existing.settlementType,
+      startDate: body.startDate !== undefined ? body.startDate : existing.startDate,
+      endDate: body.endDate !== undefined ? body.endDate : existing.endDate,
+      isActive: body.isActive !== undefined ? body.isActive : existing.isActive,
+      updatedAt: new Date()
+    })
+    .where(and(eq(companyOfferRules.id, id), eq(companyOfferRules.userId, auth.id)))
+    .returning();
+
+  return c.json({ message: "অফার সফলভাবে আপডেট হয়েছে", data: updated });
+};
+
+export const deleteCompanyOffer: Handler = async (c: any) => {
+  const auth = c.get("auth");
+  const { id } = c.req.valid("param");
+
+  await db
+    .delete(companyOfferRules)
+    .where(and(eq(companyOfferRules.id, id), eq(companyOfferRules.userId, auth.id)));
+
+  return c.json({ message: "অফার মুছে ফেলা হয়েছে" });
+};
+
+export const toggleCompanyOfferStatus: Handler = async (c: any) => {
+  const auth = c.get("auth");
+  const { id } = c.req.valid("param");
+
+  const existing = await db.query.companyOfferRules.findFirst({
+    where: and(eq(companyOfferRules.id, id), eq(companyOfferRules.userId, auth.id))
+  });
+
+  if (!existing) {
+    return c.json({ message: "অফার পাওয়া যায়নি" }, HttpStatusCodes.NOT_FOUND);
+  }
+
+  const [updated] = await db
+    .update(companyOfferRules)
+    .set({
+      isActive: !existing.isActive,
+      updatedAt: new Date()
+    })
+    .where(and(eq(companyOfferRules.id, id), eq(companyOfferRules.userId, auth.id)))
+    .returning();
+
+  return c.json({ message: "স্ট্যাটাস পরিবর্তন হয়েছে", data: updated });
+};
+
+// ==========================================
+// ১০. গ্রাহক সার্ভিস চার্জ পলিসি (Customer Fee Rules)
+// ==========================================
+
+export const listCustomerFees: Handler = async (c: any) => {
+  const auth = c.get("auth");
+  const fees = await db.query.customerFeeRules.findMany({
+    where: eq(customerFeeRules.userId, auth.id),
+    orderBy: [desc(customerFeeRules.id)]
+  });
+  return c.json({ data: fees });
+};
+
+export const createCustomerFee: Handler = async (c: any) => {
+  const auth = c.get("auth");
+  const body = c.req.valid("json");
+
+  const [created] = await db
+    .insert(customerFeeRules)
+    .values({
+      userId: auth.id,
+      transactionType: body.transactionType,
+      billerName: body.billerName || null,
+      feeType: body.feeType,
+      flatFee: String(body.flatFee || 0),
+      percentageFee: String(body.percentageFee || 0),
+      slabsJson: body.slabsJson || null,
+      isActive: body.isActive !== undefined ? body.isActive : true
+    })
+    .returning();
+
+  return c.json({ message: "সার্ভিস ফি পলিসি সফলভাবে তৈরি হয়েছে", data: created }, HttpStatusCodes.CREATED);
+};
+
+export const updateCustomerFee: Handler = async (c: any) => {
+  const auth = c.get("auth");
+  const { id } = c.req.valid("param");
+  const body = c.req.valid("json");
+
+  const existing = await db.query.customerFeeRules.findFirst({
+    where: and(eq(customerFeeRules.id, id), eq(customerFeeRules.userId, auth.id))
+  });
+
+  if (!existing) {
+    return c.json({ message: "পলিসি পাওয়া যায়নি" }, HttpStatusCodes.NOT_FOUND);
+  }
+
+  const [updated] = await db
+    .update(customerFeeRules)
+    .set({
+      transactionType: body.transactionType !== undefined ? body.transactionType : existing.transactionType,
+      billerName: body.billerName !== undefined ? body.billerName : existing.billerName,
+      feeType: body.feeType !== undefined ? body.feeType : existing.feeType,
+      flatFee: body.flatFee !== undefined ? String(body.flatFee) : existing.flatFee,
+      percentageFee: body.percentageFee !== undefined ? String(body.percentageFee) : existing.percentageFee,
+      slabsJson: body.slabsJson !== undefined ? body.slabsJson : existing.slabsJson,
+      isActive: body.isActive !== undefined ? body.isActive : existing.isActive,
+      updatedAt: new Date()
+    })
+    .where(and(eq(customerFeeRules.id, id), eq(customerFeeRules.userId, auth.id)))
+    .returning();
+
+  return c.json({ message: "সার্ভিস ফি পলিসি আপডেট হয়েছে", data: updated });
+};
+
+export const deleteCustomerFee: Handler = async (c: any) => {
+  const auth = c.get("auth");
+  const { id } = c.req.valid("param");
+
+  await db
+    .delete(customerFeeRules)
+    .where(and(eq(customerFeeRules.id, id), eq(customerFeeRules.userId, auth.id)));
+
+  return c.json({ message: "পলিসি মুছে ফেলা হয়েছে" });
+};
+
+export const toggleCustomerFeeStatus: Handler = async (c: any) => {
+  const auth = c.get("auth");
+  const { id } = c.req.valid("param");
+
+  const existing = await db.query.customerFeeRules.findFirst({
+    where: and(eq(customerFeeRules.id, id), eq(customerFeeRules.userId, auth.id))
+  });
+
+  if (!existing) {
+    return c.json({ message: "পলিসি পাওয়া যায়নি" }, HttpStatusCodes.NOT_FOUND);
+  }
+
+  const [updated] = await db
+    .update(customerFeeRules)
+    .set({
+      isActive: !existing.isActive,
+      updatedAt: new Date()
+    })
+    .where(and(eq(customerFeeRules.id, id), eq(customerFeeRules.userId, auth.id)))
+    .returning();
+
+  return c.json({ message: "স্ট্যাটাস পরিবর্তন হয়েছে", data: updated });
 };
 

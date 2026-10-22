@@ -4,16 +4,16 @@ import vue from "@vitejs/plugin-vue";
 import { defineConfig } from "vite";
 
 const cacheBase = process.env.LOCALAPPDATA || process.env.TEMP || ".";
-const apiUrl = process.env.APP_URL || "http://localhost:3000";
+const backendPort = process.env.APP_PORT || 3000;
+const apiUrl = process.env.VITE_PROXY_TARGET || `http://127.0.0.1:${backendPort}`;
 const socketEnabled = process.env.SOCKET !== "false";
 
 const proxy: Record<string, any> = {
   "/api": { target: apiUrl, changeOrigin: true },
   "/health": { target: apiUrl, changeOrigin: true },
-  "/storage": { target: apiUrl, changeOrigin: true }
+  "/storage": { target: apiUrl, changeOrigin: true },
+  "/socket.io": { target: apiUrl, changeOrigin: true, ws: true }
 };
-
-proxy["/socket.io"] = { target: apiUrl, changeOrigin: true, ws: true };
 
 export default defineConfig({
   define: {
