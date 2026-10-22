@@ -30,6 +30,8 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV PORT=3000
+# The app reads APP_PORT (see src/env.ts); Coolify sets it to the exposed port.
+ENV APP_PORT=80
 
 # Install runtime dependencies
 RUN apk add --no-cache curl
@@ -45,11 +47,11 @@ COPY --from=builder /app/src/framework/maker-cli ./src/framework/maker-cli
 COPY --from=builder /app/src/database/migrations ./src/database/migrations
 
 # Expose HTTP port
-EXPOSE 3000
+EXPOSE 80
 
 # Health check endpoint for Coolify
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD curl -f http://localhost:3000/ || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD curl -f "http://localhost:${APP_PORT:-80}/" || exit 1
 
 # Start the application
 CMD ["npm", "start"]
