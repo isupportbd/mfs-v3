@@ -18,7 +18,9 @@ pnpm-debug.log*
 Thumbs.db
 
 # Lock files — regenerated per developer's package manager
+# package-lock.json is committed: Docker builds use `npm ci` and Coolify does
+# not have a lockfile otherwise, which makes npm's resolver crash with
+# "Cannot read properties of null (reading 'edgesOut')".
 bun.lock
-package-lock.json
 pnpm-lock.yaml
 yarn.lock

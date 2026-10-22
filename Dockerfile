@@ -6,17 +6,22 @@ WORKDIR /app
 # Install build dependencies for native modules (e.g., node-gyp, python)
 RUN apk add --no-cache python3 make g++
 
-# Copy dependency specifications
-COPY package*.json ./
+# Copy dependency specifications (lockfile is committed for reproducible builds)
+COPY package.json package-lock.json ./
 
-# Install all dependencies (including devDependencies needed for build)
-RUN npm install
+# Install all dependencies (including devDependencies needed for build).
+# The lockfile is required: resolving from package.json alone crashes npm 10
+# with "Cannot read properties of null (reading 'edgesOut')".
+RUN npm ci --no-audit --no-fund
 
 # Copy full source code
 COPY . .
 
 # Build backend and frontend UI
 RUN npm run build
+
+# Reinstall only production dependencies now that the build is finished
+RUN npm ci --omit=dev --no-audit --no-fund
 
 # ── Stage 2: Production Runner ─────────────────────────
 FROM node:22-alpine AS runner
