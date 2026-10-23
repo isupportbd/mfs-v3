@@ -22,63 +22,6 @@
             </template>
           </template>
 
-          <!-- Font switch & preview dropdown -->
-          <div class="dropdown">
-            <button
-              id="font-switch"
-              type="button"
-              class="nav-btn d-inline-flex align-items-center gap-1 px-2"
-              title="বাংলা ফন্ট নির্বাচন ও টেস্ট করুন"
-              data-bs-toggle="dropdown"
-              data-bs-display="static"
-              aria-expanded="false"
-              style="width: auto; min-width: 38px;">
-              <span class="badge bg-primary-subtle text-primary border px-1 py-0 me-1 fw-bold" style="font-size: 11px;">অA</span>
-              <span class="d-none d-sm-inline small fw-semibold" style="font-size: 12px;">
-                {{ ui.activeFont.englishName }}
-              </span>
-              <i class="bi bi-chevron-down ms-1 text-muted" style="font-size: 10px;"></i>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end shadow-lg border p-2" style="min-width: 290px; max-width: 330px; z-index: 1060;">
-              <li class="px-2 py-1 mb-1 border-bottom">
-                <div class="d-flex align-items-center justify-content-between">
-                  <span class="small fw-bold text-primary">
-                    <i class="bi bi-type me-1"></i>বাংলা ফন্ট নির্বাচন
-                  </span>
-                  <span class="badge bg-primary-subtle text-primary border">Google Fonts</span>
-                </div>
-                <div class="text-muted" style="font-size: 11px;">ক্লিক করলেই লাইভ পুরো ড্যাশবোর্ডে ফন্ট পরিবর্তন হবে</div>
-              </li>
-              <li v-for="font in BANGLA_FONTS" :key="font.id" class="my-1">
-                <button
-                  type="button"
-                  class="dropdown-item rounded-2 p-2 d-flex flex-column align-items-start transition-all"
-                  :class="{ 'active bg-primary text-white': ui.currentFontId === font.id }"
-                  @click="ui.applyFont(font.id)">
-                  <div class="w-100 d-flex align-items-center justify-content-between">
-                    <span class="fw-bold fs-6" :style="{ fontFamily: font.fontFamily }">
-                      {{ font.name }}
-                    </span>
-                    <span
-                      v-if="font.badge"
-                      class="badge"
-                      :class="ui.currentFontId === font.id ? 'bg-light text-dark' : 'bg-success-subtle text-success'"
-                      style="font-size: 10px;">
-                      {{ font.badge }}
-                    </span>
-                    <i v-else-if="ui.currentFontId === font.id" class="bi bi-check-lg"></i>
-                  </div>
-                  <div
-                    class="w-100 mt-1 d-flex justify-content-between align-items-center opacity-75"
-                    style="font-size: 12px;"
-                    :style="{ fontFamily: font.fontFamily }">
-                    <span>নমুনা: কাস্টমার, পুঁজি, লেনদেন ১২৩৪৫</span>
-                  </div>
-                </button>
-              </li>
-            </ul>
-          </div>
-
           <!-- Theme toggle -->
           <button id="theme-switch" type="button" title="theme" class="nav-btn" aria-label="button" @click="props.onToggleTheme">
             <i :class="themeIconClass"></i>
@@ -122,9 +65,6 @@
 <script setup lang="ts">
 import { computed, h, inject } from "vue";
 import { authUser } from "@/composables/useAuth";
-import { BANGLA_FONTS, useAdminUiStore } from "@/stores/admin-ui";
-
-const ui = useAdminUiStore();
 
 interface ButtonEntry {
   id: symbol;

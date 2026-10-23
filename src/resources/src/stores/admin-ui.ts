@@ -31,7 +31,7 @@ export const BANGLA_FONTS: BanglaFontOption[] = [
   },
   {
     id: "anek-bangla",
-    name: "অনেকে বাংলা (Anek Bangla)",
+    name: "অনেক বাংলা (Anek Bangla)",
     englishName: "Anek Bangla",
     fontFamily: '"Anek Bangla", "Public Sans", sans-serif',
     description: "স্মার্ট, আধুনিক ও ইউনিক কার্ভ স্টাইলের চমৎকার ফন্ট।",
@@ -43,27 +43,6 @@ export const BANGLA_FONTS: BanglaFontOption[] = [
     englishName: "Noto Sans Bengali",
     fontFamily: '"Noto Sans Bengali", "Public Sans", sans-serif',
     description: "গুগলের অফিসিয়াল স্ট্যান্ডার্ড পরিচ্ছন্ন ফন্ট।"
-  },
-  {
-    id: "tiro-bangla",
-    name: "তিরো বাংলা (Tiro Bangla)",
-    englishName: "Tiro Bangla",
-    fontFamily: '"Tiro Bangla", "Public Sans", serif',
-    description: "প্রফেশনাল, স্পষ্ট ও মার্জিত ট্রেডিশনাল লুক।"
-  },
-  {
-    id: "mina",
-    name: "মীনা (Mina)",
-    englishName: "Mina",
-    fontFamily: '"Mina", "Public Sans", sans-serif',
-    description: "সহজ, সরল ও জ্যামিতিক মিনিমালিস্টিক স্টাইল।"
-  },
-  {
-    id: "system",
-    name: "সিস্টেম ডিফল্ট (Kalpurush / SolaimanLipi)",
-    englishName: "System Bengali",
-    fontFamily: 'Kalpurush, SolaimanLipi, "Nirmala UI", Vrinda, sans-serif',
-    description: "ডিভাইসে থাকা লোকাল বা সিস্টেমের বাংলা ফন্ট।"
   }
 ];
 
