@@ -26,14 +26,20 @@
 * and our new class
 */
 
+:root {
+  --app-font-family: "Hind Siliguri", "Public Sans", "Noto Sans Bengali", sans-serif;
+  --bs-body-font-family: var(--app-font-family);
+  --bs-font-sans-serif: var(--app-font-family);
+}
+
 html,
 body {
   height: 100%;
   color: $gray-700;
   scroll-behavior: smooth;
-  font-family: "Public Sans", "Noto Sans Bengali", sans-serif;
-  --bs-body-font-family: "Public Sans", "Noto Sans Bengali", sans-serif;
-  --bs-font-sans-serif: "Public Sans", "Noto Sans Bengali", sans-serif;
+  font-family: var(--app-font-family);
+  --bs-body-font-family: var(--app-font-family);
+  --bs-font-sans-serif: var(--app-font-family);
 }
 
 #app {

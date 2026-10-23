@@ -8,10 +8,9 @@
     <link rel="icon" type="image/svg+xml" href="./src/assets/images/logo.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600;700&family=Mina:wght@400;700&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Tiro+Bangla:ital@0;1&display=swap" rel="stylesheet" />
     <script>
-      // Apply the persisted theme before the first paint so the app never flashes
-      // the wrong background. Kept in sync with stores/admin-ui.ts.
+      // Apply the persisted theme and font before the first paint
       (function () {
         var root = document.documentElement;
         var mode = "auto";
@@ -28,6 +27,12 @@
         }
         root.classList.add("theme-" + mode);
         root.setAttribute("data-bs-theme", effective);
+
+        try {
+          var font = localStorage.getItem("app-bangla-font") || "Hind Siliguri";
+          root.style.setProperty("--app-font-family", '"' + font + '", "Public Sans", sans-serif');
+          root.style.setProperty("--bs-body-font-family", '"' + font + '", "Public Sans", sans-serif');
+        } catch (e) {}
       })();
     </script>
   </head>

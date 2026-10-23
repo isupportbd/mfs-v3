@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 
 const THEME_KEY = "app-theme";
+const FONT_KEY = "app-bangla-font";
 const SIDEBAR_COLLAPSE_KEY = "sidebar-open-collapses";
 const SIDEBAR_SCROLL_KEY = "sidebar-scroll-top";
 type ThemeMode = "light" | "dark" | "auto";
@@ -9,9 +10,66 @@ type EffectiveTheme = "light" | "dark";
 const THEME_MODES: ThemeMode[] = ["light", "dark", "auto"];
 const THEME_CLASSES = ["theme-light", "theme-dark", "theme-auto"];
 
+export interface BanglaFontOption {
+  id: string;
+  name: string;
+  englishName: string;
+  fontFamily: string;
+  description: string;
+  badge?: string;
+}
+
+export const BANGLA_FONTS: BanglaFontOption[] = [
+  {
+    id: "hind-siliguri",
+    name: "হিন্দ শিলিগুড়ি (Hind Siliguri)",
+    englishName: "Hind Siliguri",
+    fontFamily: '"Hind Siliguri", "Public Sans", sans-serif',
+    description: "সবচেয়ে জনপ্রিয়, আধুনিক ও দৃষ্টিনন্দন UI ফন্ট। ড্যাশবোর্ড ও অ্যাপের জন্য সেরা।",
+    badge: "Recommended"
+  },
+  {
+    id: "anek-bangla",
+    name: "অনেকে বাংলা (Anek Bangla)",
+    englishName: "Anek Bangla",
+    fontFamily: '"Anek Bangla", "Public Sans", sans-serif',
+    description: "স্মার্ট, আধুনিক ও ইউনিক কার্ভ স্টাইলের চমৎকার ফন্ট।",
+    badge: "Modern"
+  },
+  {
+    id: "noto-sans-bengali",
+    name: "নোতো সান্স (Noto Sans Bengali)",
+    englishName: "Noto Sans Bengali",
+    fontFamily: '"Noto Sans Bengali", "Public Sans", sans-serif',
+    description: "গুগলের অফিসিয়াল স্ট্যান্ডার্ড পরিচ্ছন্ন ফন্ট।"
+  },
+  {
+    id: "tiro-bangla",
+    name: "তিরো বাংলা (Tiro Bangla)",
+    englishName: "Tiro Bangla",
+    fontFamily: '"Tiro Bangla", "Public Sans", serif',
+    description: "প্রফেশনাল, স্পষ্ট ও মার্জিত ট্রেডিশনাল লুক।"
+  },
+  {
+    id: "mina",
+    name: "মীনা (Mina)",
+    englishName: "Mina",
+    fontFamily: '"Mina", "Public Sans", sans-serif',
+    description: "সহজ, সরল ও জ্যামিতিক মিনিমালিস্টিক স্টাইল।"
+  },
+  {
+    id: "system",
+    name: "সিস্টেম ডিফল্ট (Kalpurush / SolaimanLipi)",
+    englishName: "System Bengali",
+    fontFamily: 'Kalpurush, SolaimanLipi, "Nirmala UI", Vrinda, sans-serif',
+    description: "ডিভাইসে থাকা লোকাল বা সিস্টেমের বাংলা ফন্ট।"
+  }
+];
+
 export const useAdminUiStore = defineStore("admin-ui", () => {
   const sidebarOpen = ref(false);
   const themeMode = ref<ThemeMode>("auto");
+  const currentFontId = ref<string>("hind-siliguri");
   const sidebarOpenCollapseIds = ref<string[]>([]);
   const sidebarScrollTop = ref(0);
   let sidebarAccordionEl: HTMLElement | null = null;
@@ -74,6 +132,46 @@ export const useAdminUiStore = defineStore("admin-ui", () => {
     applyTheme(THEME_MODES[(index + 1) % THEME_MODES.length]);
   };
 
+  const activeFont = computed(() => {
+    return BANGLA_FONTS.find((f) => f.id === currentFontId.value) || BANGLA_FONTS[0];
+  });
+
+  const applyFont = (fontId: string) => {
+    const font = BANGLA_FONTS.find((f) => f.id === fontId) || BANGLA_FONTS[0];
+    currentFontId.value = font.id;
+
+    if (typeof document !== "undefined") {
+      const root = document.documentElement;
+      root.style.setProperty("--app-font-family", font.fontFamily);
+      root.style.setProperty("--bs-body-font-family", font.fontFamily);
+      root.style.setProperty("--bs-font-sans-serif", font.fontFamily);
+
+      if (document.body) {
+        document.body.style.setProperty("--app-font-family", font.fontFamily);
+        document.body.style.setProperty("--bs-body-font-family", font.fontFamily);
+        document.body.style.setProperty("--bs-font-sans-serif", font.fontFamily);
+      }
+    }
+
+    try {
+      localStorage.setItem(FONT_KEY, font.id);
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const initFont = () => {
+    let saved: string | null = null;
+    try {
+      saved = localStorage.getItem(FONT_KEY);
+    } catch {
+      saved = null;
+    }
+
+    const initialFontId = saved && BANGLA_FONTS.some((f) => f.id === saved) ? saved : "hind-siliguri";
+    applyFont(initialFontId);
+  };
+
   const initTheme = () => {
     let saved: string | null = null;
     try {
@@ -84,6 +182,7 @@ export const useAdminUiStore = defineStore("admin-ui", () => {
 
     const mode = THEME_MODES.includes(saved as ThemeMode) ? (saved as ThemeMode) : "auto";
     applyTheme(mode);
+    initFont();
     watchSystemColorScheme();
   };
 
@@ -192,6 +291,10 @@ export const useAdminUiStore = defineStore("admin-ui", () => {
     themeMode,
     themeIcon,
     isDark,
+    currentFontId,
+    activeFont,
+    applyFont,
+    initFont,
     toggleSidebar,
     closeSidebar,
     applyTheme,
