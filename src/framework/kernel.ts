@@ -26,12 +26,14 @@ export async function createKernel() {
 
   await initDatabase();
 
-  // নিশ্চিত করা যে সিস্টেমের রোল ও সুপারএডমিন তৈরি আছে
+  // নিশ্চিত করা যে সিস্টেমের রোল, সুপারএডমিন ও প্রাথমিক প্ল্যান তৈরি আছে
   try {
     const RoleSeeder = (await import("@/modules/auth/database/seeders/role.js")).default;
     const UserSeeder = (await import("@/modules/auth/database/seeders/user.js")).default;
+    const PlanSeeder = (await import("@/modules/subscription/database/seeders/plan.js")).default;
     await RoleSeeder();
     await UserSeeder();
+    await PlanSeeder();
   } catch (err: any) {
     console.warn("Bootstrap seeder warning:", err?.message || err);
   }

@@ -1,13 +1,28 @@
 import { desc, eq } from "drizzle-orm";
 import type { Handler } from "hono";
 import { db, HttpStatusCodes } from "@/framework/facade.js";
+import { users } from "@/modules/auth/database/models/user.js";
 import { plans, subscriptions } from "../database/models/subscription.js";
 
 // ১. সকল প্ল্যান তালিকা পাওয়া
 export const listPlans: Handler = async (c: any) => {
-  const allPlans = await db.query.plans.findMany({
+  let allPlans = await db.query.plans.findMany({
     orderBy: [desc(plans.createdAt)]
   });
+
+  // যদি ডাটাবেজে প্ল্যান খালি থাকে, তবে ডিফল্ট প্ল্যানগুলো সিড করা
+  if (allPlans.length === 0) {
+    try {
+      const PlanSeeder = (await import("../database/seeders/plan.js")).default;
+      await PlanSeeder();
+      allPlans = await db.query.plans.findMany({
+        orderBy: [desc(plans.createdAt)]
+      });
+    } catch (err) {
+      console.warn("Auto-seed plans warning:", err);
+    }
+  }
+
   return c.json({ data: allPlans });
 };
 
@@ -54,15 +69,88 @@ export const listPendingSubscriptions: Handler = async (c: any) => {
 };
 
 // ৪. সকল সাবস্ক্রিপশন ও ইউজারের তালিকা (সুপার এডমিনের জন্য)
+// সকল রেজিস্টার্ড ইউজারকে অন্তর্ভুক্ত করা এবং মিসিং থাকলে স্বয়ংক্রিয়ভাবে ট্রায়াল সাবস্ক্রিপশন তৈরি করা
 export const listAllSubscriptions: Handler = async (c: any) => {
-  const all = await db.query.subscriptions.findMany({
+  // ১. সকল ইউজার আনা
+  const allUsers = await db.query.users.findMany({
+    with: { role: true },
+    orderBy: [desc(users.id)]
+  });
+
+  // ২. বিদ্যমান সকল সাবস্ক্রিপশন আনা
+  const allSubs = await db.query.subscriptions.findMany({
     with: {
       user: true,
       plan: true
     },
     orderBy: [desc(subscriptions.id)]
   });
-  return c.json({ data: all });
+
+  // ডিফল্ট প্ল্যান
+  const defaultPlan = await db.query.plans.findFirst({
+    where: eq(plans.isActive, true)
+  });
+
+  const existingSubUserIds = new Set(allSubs.map((s) => s.userId));
+
+  // ৩. যেসব সাধারণ ইউজারের কোনো সাবস্ক্রিপশন রেকর্ড নেই, তাদের স্বয়ংক্রিয়ভাবে অন্তর্ভুক্ত ও ট্রায়াল ইনিশিয়ালাইজ করা
+  for (const user of allUsers) {
+    // সুপারএডমিন ছাড়া বাকি সাধারণ গ্রাহকদের জন্য
+    if (user.role?.name === "superadmin") continue;
+
+    if (!existingSubUserIds.has(user.id)) {
+      const trialEndsAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      try {
+        const [newSub] = await db
+          .insert(subscriptions)
+          .values({
+            userId: user.id,
+            planId: defaultPlan?.id ?? null,
+            status: "trial",
+            activatedAt: new Date(),
+            expiresAt: trialEndsAt,
+            createdAt: user.createdAt || new Date(),
+            updatedAt: new Date()
+          })
+          .returning();
+
+        if (newSub) {
+          allSubs.push({
+            ...newSub,
+            user,
+            plan: defaultPlan || null
+          });
+          existingSubUserIds.add(user.id);
+        }
+      } catch (err) {
+        console.error("Auto-heal subscription notice for user:", user.id, err);
+        allSubs.push({
+          id: -user.id,
+          userId: user.id,
+          planId: null,
+          status: "trial",
+          trxId: null,
+          paymentMethod: null,
+          paymentNote: null,
+          activatedAt: user.createdAt,
+          expiresAt: null,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+          user,
+          plan: null
+        });
+      }
+    }
+  }
+
+  // সর্বশেষ রেজিস্ট্রেশন ও সাবস্ক্রিপশন অনুযায়ী সাজানো
+  allSubs.sort((a, b) => {
+    const timeA = new Date(a.createdAt || 0).getTime();
+    const timeB = new Date(b.createdAt || 0).getTime();
+    return timeB - timeA;
+  });
+
+  return c.json({ data: allSubs });
 };
 
 // ৫. পেমেন্ট ভেরিফাই করে সাবস্ক্রিপশন Approve করা (সুপার এডমিন)
@@ -129,11 +217,37 @@ export const rejectSubscription: Handler = async (c: any) => {
 export const getMySubscription: Handler = async (c: any) => {
   const auth = c.get("auth");
 
-  const history = await db.query.subscriptions.findMany({
+  let history = await db.query.subscriptions.findMany({
     where: eq(subscriptions.userId, auth.id),
     with: { plan: true },
     orderBy: [desc(subscriptions.id)]
   });
+
+  // যদি এই ইউজারের কোনো সাবস্ক্রিপশন রেকর্ড না থাকে (সেলফ-হিলিং)
+  if (history.length === 0) {
+    const defaultPlan = await db.query.plans.findFirst({
+      where: eq(plans.isActive, true)
+    });
+    const trialEndsAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    try {
+      const [newSub] = await db
+        .insert(subscriptions)
+        .values({
+          userId: auth.id,
+          planId: defaultPlan?.id ?? null,
+          status: "trial",
+          activatedAt: new Date(),
+          expiresAt: trialEndsAt
+        })
+        .returning();
+
+      if (newSub) {
+        history = [{ ...newSub, plan: defaultPlan || null }];
+      }
+    } catch (err) {
+      console.warn("Auto create trial error in getMySubscription:", err);
+    }
+  }
 
   // বর্তমান সক্রিয় বা ট্রায়াল সাবস্ক্রিপশন (যদি থাকে)
   const current = history.find(s => s.status === "active" || s.status === "trial") || history[0] || null;

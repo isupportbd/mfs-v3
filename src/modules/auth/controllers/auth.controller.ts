@@ -4,7 +4,7 @@ import { authConfig, jwtConfig } from "@/config/index.js";
 import { cookie, db, dispatchEvent, HttpStatusCodes, jwt, password, urls } from "@/framework/facade.js";
 import { roles } from "@/modules/auth/database/models/role.js";
 import { emailVerificationTokens, passwordResetTokens, refreshTokens, users } from "@/modules/auth/database/models/user.js";
-import { subscriptions } from "@/modules/subscription/database/models/subscription.js";
+import { plans, subscriptions } from "@/modules/subscription/database/models/subscription.js";
 import {
   hashEmailVerificationToken,
   hashResetToken,
@@ -43,30 +43,56 @@ export const register: Handler = async (c: any) => {
       }
     }
 
-    const [newUser] = await db.insert(users).values({
-      name: body.name,
-      companyName: body.companyName,
-      mobile: body.mobile,
-      address: body.address,
-      email: body.email,
-      password: await password.hashPassword(body.password),
-      roleId: defaultRole?.id ?? null
-    }).returning();
-
-    const insertedId = newUser?.id;
-    if (!insertedId) {
-      throw new Error("Failed to resolve inserted user id");
+    // ভ্যালিড প্ল্যান আইডি নিশ্চিত করা যাতে ফরেন কি মিসম্যাচ এরর না ঘটে
+    let resolvedPlanId: number | null = null;
+    if (body.planId) {
+      const planRow = await db.query.plans.findFirst({
+        where: eq(plans.id, Number(body.planId))
+      });
+      if (planRow) {
+        resolvedPlanId = planRow.id;
+      }
+    }
+    if (!resolvedPlanId) {
+      const defaultPlan = await db.query.plans.findFirst({
+        where: eq(plans.isActive, true)
+      });
+      if (defaultPlan) {
+        resolvedPlanId = defaultPlan.id;
+      }
     }
 
-    // স্বয়ংক্রিয়ভাবে ৭ দিনের ফ্রি ট্রায়াল সাবস্ক্রিপশন তৈরি করা
+    const hashedPassword = await password.hashPassword(body.password);
     const trialEndsAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-    await db.insert(subscriptions).values({
-      userId: insertedId,
-      planId: body.planId ? Number(body.planId) : null,
-      status: "trial",
-      activatedAt: new Date(),
-      expiresAt: trialEndsAt
+
+    // ইউজার ও ট্রায়াল সাবস্ক্রিপশন ট্রানজাকশনের মাধ্যমে নিশ্চিত করা
+    const newUser = await db.transaction(async (tx) => {
+      const [u] = await tx.insert(users).values({
+        name: body.name,
+        companyName: body.companyName,
+        mobile: body.mobile,
+        address: body.address,
+        email: body.email,
+        password: hashedPassword,
+        roleId: defaultRole?.id ?? null
+      }).returning();
+
+      if (!u?.id) {
+        throw new Error("Failed to resolve inserted user id");
+      }
+
+      await tx.insert(subscriptions).values({
+        userId: u.id,
+        planId: resolvedPlanId,
+        status: "trial",
+        activatedAt: new Date(),
+        expiresAt: trialEndsAt
+      });
+
+      return u;
     });
+
+    const insertedId = newUser?.id;
 
     const user = await db.query.users.findFirst({
       where: eq(users.id, insertedId),
