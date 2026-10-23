@@ -131,6 +131,20 @@ export const useAdminUiStore = defineStore("admin-ui", () => {
         document.body.style.setProperty("--bs-body-font-family", font.fontFamily);
         document.body.style.setProperty("--bs-font-sans-serif", font.fontFamily);
       }
+
+      let styleEl = document.getElementById("app-bangla-font-style") as HTMLStyleElement | null;
+      if (!styleEl) {
+        styleEl = document.createElement("style");
+        styleEl.id = "app-bangla-font-style";
+        document.head.appendChild(styleEl);
+      }
+      styleEl.textContent = `
+        :root, html, body, #app, button, input, select, textarea,
+        .btn, .badge, .form-control, .form-select, .table,
+        h1, h2, h3, h4, h5, h6, .card-title, .card-header {
+          font-family: ${font.fontFamily} !important;
+        }
+      `;
     }
 
     try {
@@ -150,10 +164,9 @@ export const useAdminUiStore = defineStore("admin-ui", () => {
 
     if (saved && BANGLA_FONTS.some((f) => f.id === saved)) {
       applyFont(saved);
-      return;
+    } else {
+      applyFont("hind-siliguri");
     }
-
-    applyFont("hind-siliguri");
 
     try {
       const res = await axios.get("/api/settings/public");

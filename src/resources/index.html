@@ -29,9 +29,15 @@
         root.setAttribute("data-bs-theme", effective);
 
         try {
-          var font = localStorage.getItem("app-bangla-font") || "Hind Siliguri";
-          root.style.setProperty("--app-font-family", '"' + font + '", "Public Sans", sans-serif');
-          root.style.setProperty("--bs-body-font-family", '"' + font + '", "Public Sans", sans-serif');
+          var fontId = localStorage.getItem("app-bangla-font") || "hind-siliguri";
+          var fontMap = {
+            "hind-siliguri": '"Hind Siliguri", "Public Sans", sans-serif',
+            "anek-bangla": '"Anek Bangla", "Public Sans", sans-serif',
+            "noto-sans-bengali": '"Noto Sans Bengali", "Public Sans", sans-serif'
+          };
+          var family = fontMap[fontId] || fontMap["hind-siliguri"];
+          root.style.setProperty("--app-font-family", family);
+          root.style.setProperty("--bs-body-font-family", family);
         } catch (e) {}
       })();
     </script>
