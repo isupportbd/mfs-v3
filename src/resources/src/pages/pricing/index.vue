@@ -248,6 +248,15 @@
           <p class="text-muted mt-2 small">প্লান লোড হচ্ছে...</p>
         </div>
 
+        <!-- খালি অবস্থা (যদি ডাটাবেজে কোনো প্লান না থাকে) -->
+        <div v-else-if="displayPlans.length === 0" class="text-center py-5">
+          <div class="mb-3 text-muted">
+            <i class="bi bi-box-seam" style="font-size: 3rem;"></i>
+          </div>
+          <h5 class="fw-bold text-muted">বর্তমানে কোনো সক্রিয় সাবস্ক্রিপশন প্লান নেই</h5>
+          <p class="text-muted small">সুপারএডমিন ড্যাশবোর্ড থেকে নতুন প্লান তৈরি করা হলে এখানে প্রদর্শিত হবে।</p>
+        </div>
+
         <!-- প্লান কার্ড গ্রিড -->
         <div v-else class="row g-4 justify-content-center align-items-stretch">
           <div
@@ -586,50 +595,13 @@ interface PlanItem {
 
 const rawPlans = ref<PlanItem[]>([]);
 
-// ডিফল্ট প্লানস (যদি এপিআই কল কোনো কারণে অফলাইন থাকে)
-const defaultPlans: PlanItem[] = [
-  {
-    id: 1,
-    name: "Basic",
-    description: "ছোট দোকান বা একক উদ্যোক্তাদের জন্য উপযুক্ত।",
-    price: "100.00",
-    durationDays: 30,
-    yearlyDiscount: "0.00",
-    maxMfsAccounts: 1,
-    maxTransactions: 500,
-    isActive: true
-  },
-  {
-    id: 2,
-    name: "Business",
-    description: "বিকাশ ও নগদ দুটোই যাদের নিয়মিত লেনদেন করতে হয়।",
-    price: "200.00",
-    durationDays: 30,
-    yearlyDiscount: "5.00",
-    maxMfsAccounts: 2,
-    maxTransactions: 2000,
-    isActive: true
-  },
-  {
-    id: 3,
-    name: "Enterprise",
-    description: "বড় ব্যবসা বা এজেন্সির জন্য আনলিমিটেড অ্যাকাউন্ট সুবিধা।",
-    price: "500.00",
-    durationDays: 30,
-    yearlyDiscount: "10.00",
-    maxMfsAccounts: null,
-    maxTransactions: null,
-    isActive: true
-  }
-];
-
 const displayPlans = computed(() => {
-  const source = rawPlans.value.length > 0 ? rawPlans.value.filter((p) => p.isActive) : defaultPlans;
-  return source.map((plan) => ({
-    ...plan,
-    // Business প্লানকে ডিফল্ট জনপ্রিয় চিহ্নিত করা
-    isPopular: plan.name.toLowerCase().includes("business") || plan.name.toLowerCase().includes("pro")
-  }));
+  return rawPlans.value
+    .filter((p) => p.isActive)
+    .map((plan) => ({
+      ...plan,
+      isPopular: plan.name.toLowerCase().includes("business") || plan.name.toLowerCase().includes("pro")
+    }));
 });
 
 function getDefaultDesc(name: string): string {
