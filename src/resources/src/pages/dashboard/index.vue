@@ -522,6 +522,11 @@ onMounted(async () => {
   border-top-width: 3.5px !important;
 }
 
+.merchant-card .card-title {
+  line-height: 1.35;
+  padding-top: 2px;
+}
+
 .card-bar-primary {
   border-top-color: #0d6efd !important;
 }

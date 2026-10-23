@@ -47,6 +47,13 @@ body {
   min-height: 100%;
 }
 
+/* বাংলা ফন্টের মাত্রা ও ঊর্ধ্বাংশের কার-চিহ্ন যাতে কেটে না যায় */
+.merchant-card .card-title,
+.card-title {
+  line-height: 1.35;
+  padding-top: 2px;
+}
+
 /* Chrome, Safari, Edge, Opera: আপ-ডাউন এরো বাটন বন্ধ */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
