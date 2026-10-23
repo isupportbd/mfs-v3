@@ -235,7 +235,9 @@
               :class="isYearly ? 'btn-primary shadow-sm' : 'btn-ghost text-muted'"
               @click="isYearly = true">
               বাৎসরিক বিল
-              <span class="badge bg-warning text-dark rounded-pill ms-1 fw-bold">১০% পর্যন্ত ছাড়</span>
+              <span v-if="maxDiscountPercentage > 0" class="badge bg-warning text-dark rounded-pill ms-1 fw-bold">
+                {{ maxDiscountPercentage }}% পর্যন্ত ছাড়
+              </span>
             </button>
           </div>
         </div>
@@ -315,7 +317,10 @@
                   <li class="d-flex align-items-center mb-2 text-start">
                     <i class="bi bi-check-circle-fill text-success me-2"></i>
                     <span>
-                      <strong>{{ plan.maxTransactions ? `${Number(plan.maxTransactions).toLocaleString()}টি` : 'আনলিমিটেড' }}</strong> লেনদেন ট্র্যাকিং
+                      <strong>আনলিমিটেড</strong> লেনদেন ট্র্যাকিং
+                      <small v-if="plan.maxTransactions && Number(plan.maxTransactions) > 0" class="text-muted ms-1">
+                        (ট্রায়ালে {{ Number(plan.maxTransactions).toLocaleString() }}টি)
+                      </small>
                     </span>
                   </li>
                   <li class="d-flex align-items-center mb-2 text-start">
@@ -602,6 +607,11 @@ const displayPlans = computed(() => {
       ...plan,
       isPopular: plan.name.toLowerCase().includes("business") || plan.name.toLowerCase().includes("pro")
     }));
+});
+
+const maxDiscountPercentage = computed(() => {
+  const discounts = displayPlans.value.map((p) => Number(p.yearlyDiscount) || 0);
+  return discounts.length > 0 ? Math.max(...discounts) : 0;
 });
 
 function getDefaultDesc(name: string): string {
