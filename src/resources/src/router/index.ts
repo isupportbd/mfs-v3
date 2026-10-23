@@ -68,6 +68,12 @@ export const routes = [
         name: "admin.settings",
         component: () => import("@/pages/admin/settings.vue"),
         meta: { requiresAuth: true }
+      },
+      {
+        path: "/admin/users",
+        name: "admin.users",
+        component: () => import("@/pages/admin/users.vue"),
+        meta: { requiresAuth: true }
       }
     ]
   },

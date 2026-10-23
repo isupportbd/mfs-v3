@@ -53,6 +53,18 @@ export const listPendingSubscriptions: Handler = async (c: any) => {
   return c.json({ data: pending });
 };
 
+// ৪. সকল সাবস্ক্রিপশন ও ইউজারের তালিকা (সুপার এডমিনের জন্য)
+export const listAllSubscriptions: Handler = async (c: any) => {
+  const all = await db.query.subscriptions.findMany({
+    with: {
+      user: true,
+      plan: true
+    },
+    orderBy: [desc(subscriptions.id)]
+  });
+  return c.json({ data: all });
+};
+
 // ৫. পেমেন্ট ভেরিফাই করে সাবস্ক্রিপশন Approve করা (সুপার এডমিন)
 export const approveSubscription: Handler = async (c: any) => {
   const { id } = c.req.valid("param");
@@ -84,6 +96,32 @@ export const approveSubscription: Handler = async (c: any) => {
   return c.json({
     message: `Subscription approved successfully. Valid for ${durationDays} days.`,
     data: approved
+  });
+};
+
+// ৫.১ সাবস্ক্রিপশন Reject করা (সুপার এডমিন)
+export const rejectSubscription: Handler = async (c: any) => {
+  const { id } = c.req.valid("param");
+  const sub = await db.query.subscriptions.findFirst({
+    where: eq(subscriptions.id, id)
+  });
+
+  if (!sub) {
+    return c.json({ message: "Subscription request not found" }, HttpStatusCodes.NOT_FOUND);
+  }
+
+  const [rejected] = await db
+    .update(subscriptions)
+    .set({
+      status: "cancelled",
+      updatedAt: new Date()
+    })
+    .where(eq(subscriptions.id, id))
+    .returning();
+
+  return c.json({
+    message: "Subscription request rejected/cancelled",
+    data: rejected
   });
 };
 

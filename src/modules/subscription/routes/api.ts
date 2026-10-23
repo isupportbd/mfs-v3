@@ -4,9 +4,11 @@ import { requireRole } from "@/middlewares/role-middleware.js";
 import {
   approveSubscription,
   createPlan,
+  listAllSubscriptions,
   listPendingSubscriptions,
   listPlans,
   getMySubscription,
+  rejectSubscription,
   requestSubscription
 } from "../controllers/subscription.controller.js";
 import {
@@ -141,12 +143,37 @@ const userSubscriptionRouter = createRouter()
   .api(mySubscriptionRoute, getMySubscription)
   .api(requestSubscriptionRoute, requestSubscription);
 
+const allSubscriptionsRoute = createRoute({
+  path: "/subscriptions/all",
+  method: "get",
+  tags: ["Subscription"],
+  description: "Get all user subscriptions and details (Superadmin)",
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(z.object({ data: z.array(z.any()) }), "All subscriptions")
+  }
+});
+
+const rejectSubscriptionRoute = createRoute({
+  path: "/subscriptions/{id}/reject",
+  method: "post",
+  tags: ["Subscription"],
+  description: "Reject/cancel user subscription",
+  request: {
+    params: PlanIdParamsSchema
+  },
+  responses: {
+    [HttpStatusCodes.OK]: jsonContent(z.object({ message: z.string(), data: z.any() }), "Subscription rejected")
+  }
+});
+
 const adminRouter = createRouter()
   .group(authMiddleware, requireRole("superadmin"))
   .api(createPlanRoute, createPlan)
   .api(createPlanRootRoute, createPlan)
   .api(pendingSubscriptionsRoute, listPendingSubscriptions)
-  .api(approveSubscriptionRoute, approveSubscription);
+  .api(allSubscriptionsRoute, listAllSubscriptions)
+  .api(approveSubscriptionRoute, approveSubscription)
+  .api(rejectSubscriptionRoute, rejectSubscription);
 
 export default createRouter()
   .route("/", publicRouter)

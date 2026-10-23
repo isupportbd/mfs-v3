@@ -25,14 +25,19 @@
                   </div>
                   <h5 class="card-title mb-0 fs-6 fw-semibold">Users</h5>
                 </div>
-                <button type="button" class="btn btn-sm btn-outline-primary" disabled>
+                <router-link to="/admin/users" class="btn btn-sm btn-outline-primary">
                   <i class="bi bi-person-gear me-1"></i>Manage
-                </button>
+                </router-link>
               </div>
               <div class="py-2">
                 <div class="d-flex align-items-baseline">
-                  <span class="stat-value me-2">--</span>
+                  <span class="stat-value me-2">{{ totalSubCount }}</span>
                   <span class="text-muted small">Total Subscriptions</span>
+                </div>
+                <div v-if="pendingSubCount > 0" class="mt-1">
+                  <span class="badge bg-warning text-dark">
+                    <i class="bi bi-exclamation-circle me-1"></i>{{ pendingSubCount }} Pending Approval
+                  </span>
                 </div>
               </div>
             </div>
@@ -374,6 +379,8 @@ useHead({ title: "Dashboard" });
 
 const { user } = useAuth();
 const isSuperAdmin = computed(() => user.value?.role?.name === "superadmin");
+const totalSubCount = ref(0);
+const pendingSubCount = ref(0);
 const customerCount = ref(0);
 const providerCount = ref(0);
 const capitalAmount = ref(0);
@@ -407,6 +414,18 @@ const subRemainingText = computed(() => {
 });
 
 onMounted(async () => {
+  if (isSuperAdmin.value) {
+    try {
+      const allSubRes = await axios.get("/api/subscription/subscriptions/all");
+      const list = allSubRes.data?.data || [];
+      totalSubCount.value = list.length;
+      pendingSubCount.value = list.filter((s: any) => s.status === "pending").length;
+    } catch {
+      totalSubCount.value = 0;
+      pendingSubCount.value = 0;
+    }
+  }
+
   try {
     const sRes = await axios.get("/api/subscription/my-subscription");
     activeSub.value = sRes.data?.data?.current || null;
