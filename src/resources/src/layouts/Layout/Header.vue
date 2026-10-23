@@ -33,10 +33,11 @@
               data-bs-display="static"
               aria-expanded="false"
               style="width: auto; min-width: 38px;">
-              <i class="bi bi-fonts fs-5"></i>
-              <span class="d-none d-lg-inline small fw-semibold" style="font-size: 11px;">
+              <span class="badge bg-primary-subtle text-primary border px-1 py-0 me-1 fw-bold" style="font-size: 11px;">অA</span>
+              <span class="d-none d-sm-inline small fw-semibold" style="font-size: 12px;">
                 {{ ui.activeFont.englishName }}
               </span>
+              <i class="bi bi-chevron-down ms-1 text-muted" style="font-size: 10px;"></i>
             </button>
             <ul class="dropdown-menu dropdown-menu-end shadow-lg border p-2" style="min-width: 290px; max-width: 330px; z-index: 1060;">
               <li class="px-2 py-1 mb-1 border-bottom">
