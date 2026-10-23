@@ -1,3 +1,4 @@
+import axios from "axios";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 
@@ -160,7 +161,7 @@ export const useAdminUiStore = defineStore("admin-ui", () => {
     }
   };
 
-  const initFont = () => {
+  const initFont = async () => {
     let saved: string | null = null;
     try {
       saved = localStorage.getItem(FONT_KEY);
@@ -168,8 +169,22 @@ export const useAdminUiStore = defineStore("admin-ui", () => {
       saved = null;
     }
 
-    const initialFontId = saved && BANGLA_FONTS.some((f) => f.id === saved) ? saved : "hind-siliguri";
-    applyFont(initialFontId);
+    if (saved && BANGLA_FONTS.some((f) => f.id === saved)) {
+      applyFont(saved);
+      return;
+    }
+
+    applyFont("hind-siliguri");
+
+    try {
+      const res = await axios.get("/api/settings/public");
+      const found = res.data?.data?.find((s: any) => s.key === "system_bangla_font");
+      if (found?.value && BANGLA_FONTS.some((f) => f.id === found.value)) {
+        applyFont(found.value);
+      }
+    } catch {
+      /* ignore */
+    }
   };
 
   const initTheme = () => {

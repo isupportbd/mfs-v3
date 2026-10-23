@@ -162,6 +162,146 @@
         <Pagination :data="paginationData" variant="primary" />
       </div>
     </div>
+
+    <!-- ৩. সিস্টেম ডিফল্ট বাংলা ফন্ট সেটিংস (ব্যাংক প্রোভাইডারের নিচে) -->
+    <div class="card border shadow-sm mt-4 w-100" style="min-width: 0; max-width: 100%;">
+      <div class="card-header py-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+          <h6 class="mb-0 fw-semibold text-primary">
+            <i class="bi bi-fonts me-2 fs-5"></i>সিস্টেম ডিফল্ট বাংলা ফন্ট সেটিংস (Global Bangla Font)
+          </h6>
+          <small class="text-muted">
+            সুপারএডমিন হিসেবে এখান থেকে যে ফন্টটি নির্ধারণ করবেন, তা সমস্ত সাধারণ ইউজার ও ড্যাশবোর্ডে স্বয়ংক্রিয়ভাবে ডিফল্ট ফন্ট হিসেবে কার্যকর হবে।
+          </small>
+        </div>
+        <span class="badge bg-primary-subtle text-primary border">গ্লোবাল সেটিংস</span>
+      </div>
+      <div class="card-body py-4">
+        <div class="row g-3">
+          <!-- ফন্ট ১: Hind Siliguri -->
+          <div class="col-12 col-md-4">
+            <div
+              class="border rounded-3 p-3 h-100 cursor-pointer transition-all position-relative"
+              :class="selectedFontId === 'hind-siliguri' ? 'border-primary bg-primary-subtle shadow-sm' : 'hover-border-primary'"
+              style="cursor: pointer;"
+              @click="previewAndSelectFont('hind-siliguri')">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="fw-bold fs-6" style="font-family: 'Hind Siliguri', sans-serif;">
+                  হিন্দ শিলিগুড়ি (Hind Siliguri)
+                </span>
+                <span class="badge bg-success text-white" style="font-size: 10px;">রেকমেন্ডেড</span>
+              </div>
+              <p class="text-muted small mb-3">
+                সবচেয়ে জনপ্রিয়, আধুনিক ও ক্লিন ফন্ট। ড্যাশবোর্ড, কার্ড ও ফিনান্সিয়াল ডাটার জন্য সেরা।
+              </p>
+              <div class="p-2 bg-body rounded border small mb-2" style="font-family: 'Hind Siliguri', sans-serif;">
+                <div class="fw-bold mb-1">নমুনা টেক্সট:</div>
+                <div>কাস্টমার, প্রোভাইডার, পুঁজি ও লেনদেন ১২৩৪৫৬৭৮৯০</div>
+              </div>
+              <div class="form-check mt-2">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="systemFont"
+                  id="fontHind"
+                  value="hind-siliguri"
+                  :checked="selectedFontId === 'hind-siliguri'" />
+                <label class="form-check-label small fw-semibold" for="fontHind">
+                  {{ selectedFontId === 'hind-siliguri' ? 'নির্বাচিত' : 'এই ফন্টটি বেছে নিন' }}
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- ফন্ট ২: Anek Bangla -->
+          <div class="col-12 col-md-4">
+            <div
+              class="border rounded-3 p-3 h-100 cursor-pointer transition-all position-relative"
+              :class="selectedFontId === 'anek-bangla' ? 'border-primary bg-primary-subtle shadow-sm' : 'hover-border-primary'"
+              style="cursor: pointer;"
+              @click="previewAndSelectFont('anek-bangla')">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="fw-bold fs-6" style="font-family: 'Anek Bangla', sans-serif;">
+                  অনেক বাংলা (Anek Bangla)
+                </span>
+                <span class="badge bg-info text-white" style="font-size: 10px;">মডার্ন</span>
+              </div>
+              <p class="text-muted small mb-3">
+                গুগলের আধুনিক ভেরিয়েবল ফন্ট। এর কার্ভগুলো অত্যন্ত স্মার্ট ও টেক-প্রোডাক্ট লুক দেয়।
+              </p>
+              <div class="p-2 bg-body rounded border small mb-2" style="font-family: 'Anek Bangla', sans-serif;">
+                <div class="fw-bold mb-1">নমুনা টেক্সট:</div>
+                <div>কাস্টমার, প্রোভাইডার, পুঁজি ও লেনদেন ১২৩৪৫৬৭৮৯০</div>
+              </div>
+              <div class="form-check mt-2">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="systemFont"
+                  id="fontAnek"
+                  value="anek-bangla"
+                  :checked="selectedFontId === 'anek-bangla'" />
+                <label class="form-check-label small fw-semibold" for="fontAnek">
+                  {{ selectedFontId === 'anek-bangla' ? 'নির্বাচিত' : 'এই ফন্টটি বেছে নিন' }}
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- ফন্ট ৩: Noto Sans Bengali -->
+          <div class="col-12 col-md-4">
+            <div
+              class="border rounded-3 p-3 h-100 cursor-pointer transition-all position-relative"
+              :class="selectedFontId === 'noto-sans-bengali' ? 'border-primary bg-primary-subtle shadow-sm' : 'hover-border-primary'"
+              style="cursor: pointer;"
+              @click="previewAndSelectFont('noto-sans-bengali')">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="fw-bold fs-6" style="font-family: 'Noto Sans Bengali', sans-serif;">
+                  নোতো সান্স (Noto Sans Bengali)
+                </span>
+                <span class="badge bg-secondary" style="font-size: 10px;">স্ট্যান্ডার্ড</span>
+              </div>
+              <p class="text-muted small mb-3">
+                গুগলের সার্বজনীন স্ট্যান্ডার্ড ফন্ট। ফরমাল ও অফিসিয়াল ইন্টারফেসের জন্য পরিচিত।
+              </p>
+              <div class="p-2 bg-body rounded border small mb-2" style="font-family: 'Noto Sans Bengali', sans-serif;">
+                <div class="fw-bold mb-1">নমুনা টেক্সট:</div>
+                <div>কাস্টমার, প্রোভাইডার, পুঁজি ও লেনদেন ১২৩৪৫৬৭৮৯০</div>
+              </div>
+              <div class="form-check mt-2">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="systemFont"
+                  id="fontNoto"
+                  value="noto-sans-bengali"
+                  :checked="selectedFontId === 'noto-sans-bengali'" />
+                <label class="form-check-label small fw-semibold" for="fontNoto">
+                  {{ selectedFontId === 'noto-sans-bengali' ? 'নির্বাচিত' : 'এই ফন্টটি বেছে নিন' }}
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- অ্যাকশন বাটন -->
+        <div class="mt-4 pt-3 border-top d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <div class="text-muted small">
+            <i class="bi bi-info-circle me-1"></i>
+            পরিবর্তন সংরক্ষণ করলে সমস্ত পেজ ও সকল ব্যবহারকারীর স্ক্রিনে এই ফন্ট কার্যকর হবে।
+          </div>
+          <button
+            type="button"
+            class="btn btn-primary px-4 py-2 fw-semibold d-inline-flex align-items-center"
+            :disabled="savingFont"
+            @click="saveSystemFont">
+            <span v-if="savingFont" class="spinner-border spinner-border-sm me-2" role="status"></span>
+            <i v-else class="bi bi-check-circle-fill me-2"></i>
+            ফন্ট সেভ করুন (Save Font)
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -175,8 +315,13 @@ import Input from "@/components/Input.vue";
 import Pagebar from "@/components/Pagebar.vue";
 import SearchInput from "@/components/SearchInput.vue";
 import Toast from "@/components/Toast.vue";
+import { useAdminUiStore } from "@/stores/admin-ui";
 
 useHead({ title: "Settings - MFS Ledger" });
+
+const ui = useAdminUiStore();
+const selectedFontId = ref("hind-siliguri");
+const savingFont = ref(false);
 
 interface Provider {
   id: number;
@@ -296,7 +441,46 @@ async function toggleProvider(id: number) {
   }
 }
 
+function previewAndSelectFont(fontId: string) {
+  selectedFontId.value = fontId;
+  ui.applyFont(fontId);
+}
+
+async function loadSystemFont() {
+  try {
+    const res = await axios.get("/api/settings");
+    const found = res.data?.data?.find((s: any) => s.key === "system_bangla_font");
+    if (found?.value) {
+      selectedFontId.value = found.value;
+      ui.applyFont(found.value);
+    } else {
+      selectedFontId.value = ui.currentFontId || "hind-siliguri";
+    }
+  } catch {
+    selectedFontId.value = ui.currentFontId || "hind-siliguri";
+  }
+}
+
+async function saveSystemFont() {
+  savingFont.value = true;
+  try {
+    await axios.post("/api/settings", {
+      key: "system_bangla_font",
+      value: selectedFontId.value,
+      group: "general",
+      description: "Default Bangla font for all users"
+    });
+    ui.applyFont(selectedFontId.value);
+    toastRef.value?.toastme("সিস্টেম ডিফল্ট বাংলা ফন্ট সফলভাবে সংরক্ষিত হয়েছে", "success");
+  } catch (err: any) {
+    toastRef.value?.toastme(err?.response?.data?.message || "ফন্ট সেভ করতে সমস্যা হয়েছে", "danger");
+  } finally {
+    savingFont.value = false;
+  }
+}
+
 onMounted(() => {
   fetchProviders();
+  loadSystemFont();
 });
 </script>
