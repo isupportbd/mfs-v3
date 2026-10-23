@@ -47,10 +47,29 @@ body {
   min-height: 100%;
 }
 
-/* বাংলা ফন্টের মাত্রা ও ঊর্ধ্বাংশের কার-চিহ্ন যাতে কেটে না যায় */
+/* বাংলা ফন্টের মাত্রা, চন্দ্রবিন্দু ও ঊর্ধ্বাংশের কার-চিহ্ন যাতে ড্যাশবোর্ডসহ সকল পেজেই সুন্দরভাবে প্রদর্শিত হয় */
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6,
+.card-title,
+.card-header h5,
+.card-header h6,
+.card-header,
 .merchant-card .card-title,
-.card-title {
+.breadcrumb-item,
+label,
+.btn,
+.badge,
+.text-truncate,
+.table th,
+.table td {
   line-height: 1.35;
+}
+
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6,
+.card-title,
+.card-header h6,
+.text-truncate {
   padding-top: 2px;
 }
 
