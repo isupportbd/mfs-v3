@@ -72,13 +72,13 @@
                 :err="form.errors.maxMfsAccounts" />
             </div>
 
-            <!-- Max Transactions Limit -->
+            <!-- Trial Max Transactions Limit -->
             <div class="col-6 col-md-3 col-xl-2">
               <Input
                 id="maxTransactions"
                 v-model="form.data.maxTransactions"
                 type="number"
-                label="Max Trx (0=Unltd)"
+                label="Trial Max Trx (0=Unltd)"
                 placeholder="0"
                 topclass="mb-0"
                 :err="form.errors.maxTransactions" />
@@ -157,8 +157,9 @@
                   </span>
                   <span
                     v-else
-                    class="badge bg-info-subtle text-info border border-info-subtle">
-                    {{ Number(plan.maxTransactions).toLocaleString() }} Trx
+                    class="badge bg-info-subtle text-info border border-info-subtle"
+                    title="শুধু ট্রায়াল চলাকালীন সর্বোচ্চ লেনদেনের সীমা">
+                    Trial: {{ Number(plan.maxTransactions).toLocaleString() }} Trx
                   </span>
                 </td>
                 <td class="fw-bold text-success">৳{{ Number(plan.price).toLocaleString() }}</td>

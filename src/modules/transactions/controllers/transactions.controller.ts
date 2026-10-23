@@ -89,6 +89,38 @@ export const createTransaction: Handler = async (c: any) => {
     return c.json({ message: "অননুমোদিত অ্যাক্সেস" }, HttpStatusCodes.UNAUTHORIZED);
   }
 
+  // ট্রায়াল ইউজারের ক্ষেত্রে লেনদেন সীমা এনফোর্স করা
+  try {
+    const { subscriptions } = await import("@/modules/subscription/database/models/subscription.js");
+    const { plans } = await import("@/modules/subscription/database/models/subscription.js");
+    
+    // ইউজারের বর্তমান সাবস্ক্রিপশন চেক করা
+    const userSub = await db.query.subscriptions.findFirst({
+      where: eq(subscriptions.userId, auth.id),
+      with: { plan: true }
+    });
+
+    // শুধুমাত্র স্ট্যাটাস যখন 'trial' থাকবে এবং প্ল্যানে ট্রায়াল লিমিট সেট থাকবে
+    if (userSub && userSub.status === "trial" && userSub.plan?.maxTransactions && Number(userSub.plan.maxTransactions) > 0) {
+      const trialLimit = Number(userSub.plan.maxTransactions);
+      const trxCount = await db.query.transactions.findMany({
+        where: eq(transactions.userId, auth.id),
+        columns: { id: true }
+      });
+
+      if (trxCount.length >= trialLimit) {
+        return c.json(
+          {
+            message: `আপনার ফ্রি ট্রায়ালের সর্বোচ্চ লেনদেন সীমা (${trialLimit}টি) পূর্ণ হয়েছে। সীমাহীন লেনদেনের জন্য অনুগ্রহ করে প্লানটি সক্রিয়/ক্রয় করুন।`
+          },
+          HttpStatusCodes.FORBIDDEN
+        );
+      }
+    }
+  } catch (err) {
+    console.warn("Trial limit check notice:", err);
+  }
+
   const body = c.req.valid("json");
   const amount = Number(body.amount);
   const fee = Number(body.fee || 0);
