@@ -29,13 +29,7 @@ export const RegisterSchema = z
     mobile: z.string().min(11, "Valid mobile number is required").max(20),
     address: z.string().min(3, "Address is required").max(500),
     email: z.email(),
-    password: z
-      .string()
-      .min(6)
-      .max(100)
-      .regex(/[a-z]/, "Password must contain lowercase letter")
-      .regex(/[A-Z]/, "Password must contain uppercase letter")
-      .regex(/[^A-Za-z0-9]/, "Password must contain special character"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
     password_confirmation: z.string(),
     planId: z.coerce.number().optional().nullable()
   })

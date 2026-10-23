@@ -1,5 +1,5 @@
 <template>
-  <header :class="{ scrolled: isScrolled }" style="padding-top: 0.25rem !important; padding-bottom: 0.25rem !important;">
+  <header :class="{ scrolled: isScrolled }">
     <nav class="navbar bg-transparent p-0">
       <div class="container-fluid p-0 d-flex align-items-center justify-content-between gap-2 flex-nowrap">
         <!-- Brand / Logo & Name -->

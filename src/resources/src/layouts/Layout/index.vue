@@ -1,7 +1,7 @@
 <template>
   <!-- main start -->
   <div class="main full-width" :class="{ 'no-transition': disableTransition }">
-    <div class="content-wrapper container-xxl px-0">
+    <div class="content-wrapper container-xxl px-2 px-sm-3">
       <Header
         :is-scrolled="headerScrolled"
         :theme-mode="themeMode"
@@ -84,34 +84,12 @@ onBeforeUnmount(() => {
   margin-right: 0 !important;
   width: 100% !important;
   max-width: 100% !important;
-  overflow-x: hidden;
-}
-
-.content-wrapper {
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
-  padding-left: 0.75rem !important;
-  padding-right: 0.75rem !important;
-}
-
-.content {
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
 }
 
 @media (max-width: 576px) {
   .main.full-width {
     margin-left: 0 !important;
     margin-right: 0 !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-  }
-
-  .content-wrapper {
-    padding-left: 0.35rem !important;
-    padding-right: 0.35rem !important;
   }
 }
 </style>

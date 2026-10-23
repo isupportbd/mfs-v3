@@ -1,16 +1,13 @@
 <template>
-  <Pagebar title="হোম" />
+  <Pagebar title="Dashboard" />
 
   <div class="dashboard-content">
     <!-- ১. সুপারএডমিন প্যানেল (শুধুমাত্র সুপারএডমিন দেখতে পাবেন) -->
     <div v-if="isSuperAdmin" class="superadmin-section mb-4 pb-2 border-bottom">
-      <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+      <div class="d-flex align-items-center mb-3">
         <h5 class="fs-6 fw-bold mb-0 text-muted">
           <i class="bi bi-shield-lock-fill me-1 text-primary"></i>সুপারএডমিন কন্ট্রোল প্যানেল
         </h5>
-        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1">
-          Superadmin Controls
-        </span>
       </div>
 
       <div class="row g-3">
@@ -491,7 +488,6 @@ onMounted(async () => {
 .dashboard-content {
   width: 100%;
   max-width: 100%;
-  overflow-x: hidden;
 }
 
 .card-icon-box {
@@ -561,7 +557,15 @@ onMounted(async () => {
 
 @media (max-width: 575.98px) {
   .merchant-card .card-body {
-    padding: 0.85rem !important;
+    padding: 0.75rem !important;
+  }
+  .stat-value {
+    font-size: 1.15rem;
+  }
+  .card-icon-box {
+    width: 30px;
+    height: 30px;
+    font-size: 0.9rem;
   }
 }
 </style>

@@ -177,9 +177,14 @@ const onSubmit = async () => {
         message.value = "Registration successful. Please verify your email.";
         form.reset();
       },
-      onError: (_errors, error) => {
+      onError: (errors: any, error: any) => {
         isError.value = true;
-        message.value = error instanceof Error ? error.message : "Unable to register right now";
+        const serverMsg = error?.response?.data?.message;
+        const firstFieldErr = errors && Object.values(errors)[0];
+        message.value =
+          (Array.isArray(firstFieldErr) ? firstFieldErr[0] : firstFieldErr) ||
+          serverMsg ||
+          (error instanceof Error ? error.message : "Unable to register right now");
       }
     }
   );
