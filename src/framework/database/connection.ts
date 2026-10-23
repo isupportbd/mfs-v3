@@ -87,11 +87,21 @@ export async function initDatabase() {
   // Auto-run migrations in production or if tables are not yet created
   try {
     const { migrate } = await optionalImport("drizzle-orm/postgres-js/migrator");
-    const migrationsFolder = path.resolve(process.cwd(), "src/database/migrations/postgresql");
-    await migrate(databaseInstance, { migrationsFolder });
+    // Resolve migrations folder from both possible root locations
+    const fs = await import("node:fs");
+    let migrationsFolder = path.resolve(process.cwd(), "src/database/migrations/postgresql");
+    if (!fs.existsSync(migrationsFolder)) {
+      migrationsFolder = path.resolve(process.cwd(), "dist/src/database/migrations/postgresql");
+    }
+    if (fs.existsSync(migrationsFolder)) {
+      console.log(`Running database migrations from: ${migrationsFolder}`);
+      await migrate(databaseInstance, { migrationsFolder });
+      console.log("Database migrations applied successfully.");
+    } else {
+      console.warn(`Migrations folder not found at: ${migrationsFolder}`);
+    }
   } catch (err: any) {
-    // If migration already ran or folder not found, log warning and continue
-    console.warn("Auto-migration notice:", err?.message || err);
+    console.error("Auto-migration error:", err?.message || err);
   }
 
   return databaseInstance;

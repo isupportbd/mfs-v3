@@ -25,6 +25,17 @@ export async function createKernel() {
   const app = createHttpApp();
 
   await initDatabase();
+
+  // নিশ্চিত করা যে সিস্টেমের রোল ও সুপারএডমিন তৈরি আছে
+  try {
+    const RoleSeeder = (await import("@/modules/auth/database/seeders/role.js")).default;
+    const UserSeeder = (await import("@/modules/auth/database/seeders/user.js")).default;
+    await RoleSeeder();
+    await UserSeeder();
+  } catch (err: any) {
+    console.warn("Bootstrap seeder warning:", err?.message || err);
+  }
+
   await bootQueueJobs();
   await registerModuleRoutes(app);
 
